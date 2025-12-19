@@ -5,9 +5,27 @@ deployment:
       path: /home/oopsszwf/public_html
       domain: oopsskin.ps
       branch: main
-      sourcePath: public/
+      sourcePath: ./
       exclude_paths:
         - node_modules
         - .git
+        - .gitignore
+        - .gitattributes
         - .env
-        - storage/logs
+        - .env.*
+        - storage/logs/*
+        - storage/framework/cache/*
+        - storage/framework/sessions/*
+        - storage/framework/views/*
+        - .DS_Store
+        - Thumbs.db
+        - .idea
+        - .vscode
+        - *.log
+      post_deploy:
+        - composer install --no-dev --optimize-autoloader --no-interaction
+        - php artisan storage:link
+        - php artisan config:cache
+        - php artisan route:cache
+        - php artisan view:cache
+        - chmod -R 775 storage bootstrap/cache
