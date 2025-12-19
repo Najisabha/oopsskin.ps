@@ -1,41 +1,26 @@
-name: Deploy Laravel to cPanel
+name: Deploy Laravel Project
 
 on:
   push:
-    branches:
-      - main 
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add Host to Known Hosts
-        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploying Files (Rsync)
-        run: |
-          rsync -avz --delete \
-            --exclude='.env' \
-            --exclude='storage/' \
-            --exclude='vendor/' \
-            --exclude='node_modules/' \
-            --exclude='.git/' \
-            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/path_to_your_project/
-
-      - name: Run Remote Commands
-        run: |
-          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
-            cd ~/path_to_your_project &&
-            composer install --no-dev --optimize-autoloader &&
-            php artisan migrate --force &&
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 21098 
+          script: |
+            cd /home/oopsszwf/laravel_project
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
             php artisan optimize:clear
-          "
-        
