@@ -1,0 +1,11 @@
+---
+deployment:
+  targets:
+    public_html:
+      path: /home/oopsszwf/public_html
+      domain: oopsskin.ps
+      exclude_paths:
+        - node_modules
+        - .git
+        - .env
+        - storage/logs
