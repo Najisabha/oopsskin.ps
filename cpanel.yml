@@ -2,3 +2,4 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/oopsszwf/public_html/
     - /bin/cp -R * $DEPLOYPATH
+    - cd $DEPLOYPATH && php artisan storage:link
