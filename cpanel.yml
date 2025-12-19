@@ -1,5 +1,11 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/oopsszwf/public_html/
-    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -R * $DEPLOYPATH/ 2>/dev/null || true
+    - /bin/cp -R .[^.]* $DEPLOYPATH/ 2>/dev/null || true
+    - cd $DEPLOYPATH && composer install --no-dev --optimize-autoloader --no-interaction
+    - cd $DEPLOYPATH && chmod -R 775 storage bootstrap/cache
     - cd $DEPLOYPATH && php artisan storage:link
+    - cd $DEPLOYPATH && php artisan config:cache
+    - cd $DEPLOYPATH && php artisan route:cache
+    - cd $DEPLOYPATH && php artisan view:cache
