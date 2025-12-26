@@ -16,21 +16,22 @@
         </select>
     </div>
     
-    <div class="row g-4">
-        @for($i = 1; $i <= 12; $i++)
-            <div class="col-md-6 col-lg-3">
-                @include('components.product-card', ['product' => (object)[
-                    'id' => $i,
-                    'name' => 'منتج البحث ' . $i,
-                    'description' => 'نتيجة البحث عن: ' . request('q'),
-                    'price' => rand(50, 500),
-                    'discount' => $i % 3 == 0 ? 15 : 0,
-                    'is_new' => false,
-                    'rating' => rand(3, 5),
-                    'image' => 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop&sig=' . $i
-                ]])
+    <div class="row g-3 g-md-4">
+        @php
+            $searchProducts = [
+                ['id' => 1, 'name' => 'أحمر شفاه ماتي', 'price' => 120, 'discount_percentage' => 15, 'is_new' => true, 'rating' => 5, 'image' => 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=500&h=500&fit=crop&q=80'],
+                ['id' => 2, 'name' => 'ماسكارا طويلة الأمد', 'price' => 85, 'discount_percentage' => 0, 'is_new' => false, 'rating' => 4, 'image' => 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&h=500&fit=crop&q=80'],
+                ['id' => 3, 'name' => 'أحمر خدود', 'price' => 95, 'discount_percentage' => 20, 'is_new' => true, 'rating' => 5, 'image' => 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&h=500&fit=crop&q=80'],
+                ['id' => 4, 'name' => 'أساس سائل', 'price' => 180, 'discount_percentage' => 0, 'is_new' => false, 'rating' => 4, 'image' => 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&h=500&fit=crop&q=80'],
+                ['id' => 5, 'name' => 'ظلال عيون', 'price' => 150, 'discount_percentage' => 25, 'is_new' => false, 'rating' => 5, 'image' => 'https://images.unsplash.com/photo-1622618990740-ce57d7f904d4?w=500&h=500&fit=crop&q=80'],
+                ['id' => 6, 'name' => 'كونسيلر', 'price' => 75, 'discount_percentage' => 0, 'is_new' => true, 'rating' => 4, 'image' => 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=500&h=500&fit=crop&q=80'],
+            ];
+        @endphp
+        @foreach($searchProducts as $product)
+            <div class="col-6 col-md-6 col-lg-3">
+                @include('components.product-card', ['product' => (object)$product])
             </div>
-        @endfor
+        @endforeach
     </div>
     
     <nav aria-label="Page navigation" class="mt-5">

@@ -120,9 +120,9 @@
                 <a href="{{ route('products.index', ['main_category' => $mainCategory->id]) }}" class="btn btn-outline-dark rounded-pill px-4">عرض الكل</a>
             </div>
             
-            <div class="row g-4">
+            <div class="row g-3 g-md-4">
                 @foreach($featuredProducts as $product)
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-6 col-md-6 col-lg-3">
                         @include('components.product-card', ['product' => $product])
                     </div>
                 @endforeach

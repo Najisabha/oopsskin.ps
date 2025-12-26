@@ -27,21 +27,20 @@
         </div>
     </div>
     
-    <div class="row g-4">
-        @for($i = 1; $i <= 12; $i++)
-            <div class="col-md-6 col-lg-3">
-                @include('components.product-card', ['product' => (object)[
-                    'id' => $i,
-                    'name' => 'أحمر شفاه ' . $i,
-                    'description' => 'لون طبيعي وطويل الأمد',
-                    'price' => rand(50, 300),
-                    'discount' => $i % 4 == 0 ? 15 : 0,
-                    'is_new' => $i <= 3,
-                    'rating' => rand(3, 5),
-                    'image' => 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop&sig=' . $i
-                ]])
+    <div class="row g-3 g-md-4">
+        @php
+            $categoryProducts = [
+                ['id' => 1, 'name' => 'أحمر شفاه ماتي أحمر', 'price' => 120, 'discount_percentage' => 15, 'is_new' => true, 'rating' => 5, 'image' => 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=500&h=500&fit=crop&q=80'],
+                ['id' => 2, 'name' => 'أحمر شفاه وردي', 'price' => 110, 'discount_percentage' => 0, 'is_new' => true, 'rating' => 4, 'image' => 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&h=500&fit=crop&q=80'],
+                ['id' => 3, 'name' => 'أحمر شفاه برتقالي', 'price' => 95, 'discount_percentage' => 20, 'is_new' => false, 'rating' => 5, 'image' => 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&h=500&fit=crop&q=80'],
+                ['id' => 4, 'name' => 'أحمر شفاه بني', 'price' => 130, 'discount_percentage' => 0, 'is_new' => false, 'rating' => 4, 'image' => 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&h=500&fit=crop&q=80'],
+            ];
+        @endphp
+        @foreach($categoryProducts as $product)
+            <div class="col-6 col-md-6 col-lg-3">
+                @include('components.product-card', ['product' => (object)$product])
             </div>
-        @endfor
+        @endforeach
     </div>
     
     <nav aria-label="Page navigation" class="mt-5">

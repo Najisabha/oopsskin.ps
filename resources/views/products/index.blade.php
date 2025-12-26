@@ -135,9 +135,9 @@
             </div>
             
             @if(isset($products) && $products->count() > 0)
-                <div class="row g-4">
+                <div class="row g-3 g-md-4">
                     @foreach($products as $product)
-                        <div class="col-md-6 col-lg-4">
+                        <div class="col-6 col-md-6 col-lg-4 col-xl-3">
                             @include('components.product-card', ['product' => $product])
                         </div>
                     @endforeach

@@ -16,7 +16,9 @@
     <div class="product-image-wrapper position-relative">
         <img src="{{ $image }}" 
              class="card-img-top product-img" 
-             alt="{{ $product->name }}">
+             alt="{{ $product->name }}"
+             loading="lazy"
+             onerror="this.src='https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&h=500&fit=crop&q=80'">
         
         <div class="product-badges position-absolute top-0 start-0 p-3 d-flex flex-column gap-2">
             @if($hasDiscount)
@@ -80,8 +82,20 @@
                         $productUrl = route('products.show.simple', ['slug' => $product->slug]);
                     }
                 } elseif (isset($product->id)) {
-                    // Fallback للبيانات القديمة
-                    $productUrl = route('products.index') . '?product=' . $product->id;
+                    // Fallback للبيانات القديمة - استخدام ID لإنشاء slug مؤقت
+                    // أو التوجيه مباشرة لصفحة المنتج البسيطة
+                    if (isset($product->name)) {
+                        // إنشاء slug من الاسم
+                        $tempSlug = \Illuminate\Support\Str::slug($product->name) . '-' . $product->id;
+                        try {
+                            $productUrl = route('products.show.simple', ['slug' => $tempSlug]);
+                        } catch (\Exception $e) {
+                            // إذا فشل، استخدم ID مباشرة
+                            $productUrl = route('products.index') . '?product=' . $product->id;
+                        }
+                    } else {
+                        $productUrl = route('products.index') . '?product=' . $product->id;
+                    }
                 }
             @endphp
             <a href="{{ $productUrl }}" 
@@ -149,9 +163,16 @@
 
     /* تنسيق الصورة */
     .product-image-wrapper {
-        height: 260px;
+        height: 200px;
         overflow: hidden;
         background-color: #f8f9fa;
+    }
+    
+    /* على الشاشات الكبيرة */
+    @media (min-width: 768px) {
+        .product-image-wrapper {
+            height: 260px;
+        }
     }
 
     .product-img {

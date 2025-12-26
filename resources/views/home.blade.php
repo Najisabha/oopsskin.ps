@@ -49,6 +49,49 @@
         max-width: 650px; /* أقصى عرض للنص */
     }
     
+    /* تنسيق خاص للجوال */
+    @media (max-width: 767.98px) {
+        #heroCarousel .carousel-item {
+            height: 60vh;
+            min-height: 400px;
+        }
+        
+        #heroCarousel .carousel-caption {
+            right: 5%;
+            left: 5%;
+            max-width: 90%;
+            top: 45%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+        
+        #heroCarousel .carousel-caption h1 {
+            font-size: 1.75rem !important;
+            line-height: 1.3;
+            margin-bottom: 15px !important;
+        }
+        
+        #heroCarousel .carousel-caption p {
+            font-size: 0.9rem !important;
+            margin-bottom: 15px !important;
+        }
+        
+        #heroCarousel .carousel-caption .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+        
+        .hero-image {
+            filter: brightness(0.6);
+        }
+        
+        .hero-overlay {
+            background: linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%) !important;
+        }
+    }
+    
     /* تخصيص أزرار التنقل (الأسهم) */
     .carousel-control-prev, .carousel-control-next {
         width: 6%;
@@ -156,7 +199,8 @@
         <div class="carousel-inner">
             <div class="carousel-item active">
                 <img src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=1920&auto=format&fit=crop" class="d-block w-100 hero-image" alt="الحملة الرئيسية">
-                <div class="hero-overlay"></div> <div class="carousel-caption d-none d-md-block">
+                <div class="hero-overlay"></div>
+                <div class="carousel-caption">
                     <span class="badge bg-white text-dark mb-3 px-3 py-2 rounded-pill fs-6">جديد الموسم 🍂</span>
                     <h1 class="display-3 fw-bold mb-4 text-white">إشراقة جمالك <br> تبدأ من هنا</h1>
                     <p class="lead mb-5 text-white-50">
@@ -172,7 +216,7 @@
             <div class="carousel-item">
                 <img src="https://images.unsplash.com/photo-1596462502278-27bfdd403348?q=80&w=1920&auto=format&fit=crop" class="d-block w-100 hero-image" alt="عروض الصيف">
                 <div class="hero-overlay" style="background: linear-gradient(90deg, rgba(214, 51, 132, 0.3) 0%, rgba(0,0,0,0.5) 100%);"></div>
-                <div class="carousel-caption d-none d-md-block">
+                <div class="carousel-caption">
                     <span class="badge bg-danger mb-3 px-3 py-2 rounded-pill fs-6">تخفيضات كبرى ⚡</span>
                     <h1 class="display-3 fw-bold mb-4 text-white">تألقي في الصيف <br> بخصم 40%</h1>
                     <p class="lead mb-5 text-white-50">
@@ -282,27 +326,102 @@
             <a href="{{ route('products.index') }}" class="btn btn-outline-dark rounded-pill px-4">عرض الكل</a>
         </div>
         
-        <div class="row g-4">
+        <div class="row g-3 g-md-4">
             @forelse($featuredProducts ?? [] as $product)
-                <div class="col-md-6 col-lg-3">
+                <div class="col-6 col-md-6 col-lg-3">
                     @include('components.product-card', ['product' => $product])
                 </div>
             @empty
                 {{-- Fallback للبيانات التجريبية إذا لم تكن هناك منتجات من API --}}
-                @for($i = 1; $i <= 8; $i++)
-                    <div class="col-md-6 col-lg-3">
-                        @include('components.product-card', ['product' => (object)[
-                            'id' => $i,
-                            'name' => 'منتج تجميل فاخر ' . $i,
-                            'description' => 'وصف مختصر للمنتج يظهر هنا...',
-                            'price' => rand(150, 800),
-                            'discount_percentage' => $i % 4 == 0 ? 15 : 0,
-                            'is_new' => $i <= 2,
-                            'rating' => rand(4, 5),
-                            'image' => 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=500&h=500&fit=crop&sig=' . $i
-                        ]])
+                @php
+                    $demoProducts = [
+                        [
+                            'id' => 1,
+                            'name' => 'أحمر شفاه ماتي فاخر',
+                            'slug' => 'luxury-matte-lipstick-1',
+                            'price' => 120,
+                            'discount_percentage' => 15,
+                            'is_new' => true,
+                            'rating' => 5,
+                            'image' => 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 2,
+                            'name' => 'ماسكارا طويلة الأمد',
+                            'slug' => 'long-lasting-mascara-2',
+                            'price' => 85,
+                            'discount_percentage' => 0,
+                            'is_new' => true,
+                            'rating' => 4,
+                            'image' => 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 3,
+                            'name' => 'أحمر خدود طبيعي',
+                            'slug' => 'natural-blush-3',
+                            'price' => 95,
+                            'discount_percentage' => 20,
+                            'is_new' => false,
+                            'rating' => 5,
+                            'image' => 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 4,
+                            'name' => 'أساس سائل عالي التغطية',
+                            'slug' => 'high-coverage-foundation-4',
+                            'price' => 180,
+                            'discount_percentage' => 0,
+                            'is_new' => false,
+                            'rating' => 4,
+                            'image' => 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 5,
+                            'name' => 'ظلال عيون متعددة الألوان',
+                            'slug' => 'multi-color-eyeshadow-5',
+                            'price' => 150,
+                            'discount_percentage' => 25,
+                            'is_new' => false,
+                            'rating' => 5,
+                            'image' => 'https://images.unsplash.com/photo-1622618990740-ce57d7f904d4?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 6,
+                            'name' => 'كونسيلر سائل',
+                            'slug' => 'liquid-concealer-6',
+                            'price' => 75,
+                            'discount_percentage' => 0,
+                            'is_new' => true,
+                            'rating' => 4,
+                            'image' => 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 7,
+                            'name' => 'برايمر للوجه',
+                            'slug' => 'face-primer-7',
+                            'price' => 110,
+                            'discount_percentage' => 10,
+                            'is_new' => false,
+                            'rating' => 5,
+                            'image' => 'https://images.unsplash.com/photo-1522338247332-0be842c92e7a?w=500&h=500&fit=crop&q=80'
+                        ],
+                        [
+                            'id' => 8,
+                            'name' => 'كحل سائل',
+                            'slug' => 'liquid-eyeliner-8',
+                            'price' => 65,
+                            'discount_percentage' => 0,
+                            'is_new' => true,
+                            'rating' => 4,
+                            'image' => 'https://images.unsplash.com/photo-1556228841-c5b7e0e0e0b0?w=500&h=500&fit=crop&q=80'
+                        ]
+                    ];
+                @endphp
+                @foreach($demoProducts as $demoProduct)
+                    <div class="col-6 col-md-6 col-lg-3">
+                        @include('components.product-card', ['product' => (object)$demoProduct])
                     </div>
-                @endfor
+                @endforeach
             @endforelse
         </div>
     </div>
