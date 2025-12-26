@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MainCategoryController;
+use App\Http\Controllers\SectionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
@@ -15,13 +17,22 @@ use App\Http\Controllers\PageController;
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Categories
-Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
+// Main Categories (الأصناف الرئيسية)
+Route::get('/main-categories', [MainCategoryController::class, 'index'])->name('main-categories.index');
+Route::get('/main-categories/{slug}', [MainCategoryController::class, 'show'])->name('main-categories.show');
 
-// Products
+// Sections (الأقسام) - تحت الصنف الرئيسي
+Route::get('/main-categories/{mainCategorySlug}/sections/{sectionSlug}', [SectionController::class, 'show'])->name('sections.show');
+
+// Types/Categories (الأنواع) - تحت القسم
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/main-categories/{mainCategorySlug}/sections/{sectionSlug}/types/{typeSlug}', [CategoryController::class, 'show'])->name('categories.show');
+
+// Products (المنتجات) - تحت النوع
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/main-categories/{mainCategorySlug}/sections/{sectionSlug}/types/{typeSlug}/products/{productSlug}', [ProductController::class, 'show'])->name('products.show');
+// Route بديل للمنتجات بدون الهيكلية الكاملة (للتوافق مع البيانات القديمة)
+Route::get('/products/{slug}', [ProductController::class, 'showBySlug'])->name('products.show.simple');
 
 // Cart
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -40,19 +51,90 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/story', [PageController::class, 'story'])->name('story');
 
-// Auth Routes (if using Laravel Breeze/Jetstream, these will be auto-generated)
+// Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
         return view('auth.login');
     })->name('login');
     
+    Route::post('/login', function (\Illuminate\Http\Request $request) {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (\Illuminate\Support\Facades\Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->intended(route('home'));
+        }
+
+        return back()->withErrors([
+            'email' => 'بيانات الدخول غير صحيحة.',
+        ])->onlyInput('email');
+    });
+    
     Route::get('/register', function () {
         return view('auth.register');
     })->name('register');
     
+    Route::post('/register', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+        ]);
+
+        \Illuminate\Support\Facades\Auth::login($user);
+
+        return redirect()->route('home');
+    });
+    
     Route::get('/forgot-password', function () {
         return view('auth.forgot-password');
     })->name('password.request');
+    
+    Route::post('/forgot-password', function (\Illuminate\Http\Request $request) {
+        $request->validate(['email' => 'required|email']);
+
+        $status = \Illuminate\Support\Facades\Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === \Illuminate\Support\Facades\Password::RESET_LINK_SENT
+            ? back()->with(['status' => 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني'])
+            : back()->withErrors(['email' => 'لم نتمكن من إرسال رابط إعادة التعيين']);
+    })->name('password.email');
+    
+    Route::get('/reset-password/{token}', function (string $token) {
+        return view('auth.reset-password', ['token' => $token]);
+    })->name('password.reset');
+    
+    Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = \Illuminate\Support\Facades\Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => \Illuminate\Support\Facades\Hash::make($password)
+                ])->save();
+            }
+        );
+
+        return $status === \Illuminate\Support\Facades\Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
+    })->name('password.update');
 });
 
 // Protected Routes

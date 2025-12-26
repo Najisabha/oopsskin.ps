@@ -3,10 +3,13 @@
 @php
     // تجهيز البيانات لتقليل المنطق داخل الـ View
     $price = $product->price ?? 0;
-    $discount = $product->discount ?? 0;
+    // دعم discount_percentage من Model أو discount من البيانات الثابتة
+    $discount = $product->discount_percentage ?? ($product->discount ?? 0);
     $hasDiscount = $discount > 0;
-    $finalPrice = $hasDiscount ? $price * (1 - ($discount / 100)) : $price;
-    $image = $product->image ?? 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop';
+    // استخدام finalPrice من Model إذا كان موجوداً، وإلا حسابها
+    $finalPrice = isset($product->final_price) ? $product->final_price : ($hasDiscount ? $price * (1 - ($discount / 100)) : $price);
+    // استخدام image من Model (getImageAttribute) أو من البيانات الثابتة
+    $image = is_object($product) && method_exists($product, 'getImageAttribute') ? $product->image : ($product->image ?? 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop');
 @endphp
 
 <div class="card product-card-pro border-0 rounded-4 overflow-hidden h-100">
@@ -18,7 +21,7 @@
         <div class="product-badges position-absolute top-0 start-0 p-3 d-flex flex-column gap-2">
             @if($hasDiscount)
                 <span class="badge bg-danger rounded-pill shadow-sm">
-                    -{{ $discount }}%
+                    -{{ number_format($discount) }}%
                 </span>
             @endif
             @if(isset($product->is_new) && $product->is_new)
@@ -26,10 +29,62 @@
                     جديد
                 </span>
             @endif
+            @if(isset($product->is_featured) && $product->is_featured)
+                <span class="badge bg-warning rounded-pill shadow-sm">
+                    مميز
+                </span>
+            @endif
         </div>
 
         <div class="product-actions position-absolute top-50 start-50 translate-middle d-flex gap-2">
-            <a href="{{ route('products.show', $product->id ?? 1) }}" 
+            @php
+                // بناء رابط المنتج بناءً على الهيكلية الجديدة
+                $productUrl = '#';
+                
+                // محاولة بناء الرابط من العلاقات
+                if (isset($product->slug)) {
+                    $type = $product->type ?? null;
+                    $section = null;
+                    $mainCategory = null;
+                    
+                    if ($type) {
+                        $section = $type->section ?? null;
+                        if ($section) {
+                            $mainCategory = $section->mainCategory ?? null;
+                        }
+                    }
+                    
+                    // إذا لم تكن العلاقات محملة، جرب من المنتج مباشرة
+                    if (!$section && isset($product->section)) {
+                        $section = $product->section;
+                    }
+                    if (!$mainCategory && isset($product->mainCategory)) {
+                        $mainCategory = $product->mainCategory;
+                    }
+                    
+                    // بناء الرابط الكامل إذا كانت جميع البيانات متوفرة
+                    if ($mainCategory && $section && $type && isset($mainCategory->slug) && isset($section->slug) && isset($type->slug)) {
+                        try {
+                            $productUrl = route('products.show', [
+                                'mainCategorySlug' => $mainCategory->slug,
+                                'sectionSlug' => $section->slug,
+                                'typeSlug' => $type->slug,
+                                'productSlug' => $product->slug
+                            ]);
+                        } catch (\Exception $e) {
+                            // Fallback للرابط البسيط
+                            $productUrl = route('products.show.simple', ['slug' => $product->slug]);
+                        }
+                    } else {
+                        // استخدام الرابط البسيط إذا لم تكن العلاقات كاملة
+                        $productUrl = route('products.show.simple', ['slug' => $product->slug]);
+                    }
+                } elseif (isset($product->id)) {
+                    // Fallback للبيانات القديمة
+                    $productUrl = route('products.index') . '?product=' . $product->id;
+                }
+            @endphp
+            <a href="{{ $productUrl }}" 
                class="btn btn-light rounded-circle shadow-sm action-btn" 
                title="عرض التفاصيل"
                data-bs-toggle="tooltip">
@@ -44,10 +99,11 @@
     </div>
 
     <div class="card-body d-flex flex-column p-3">
-        <small class="text-muted mb-1">{{ $product->category->name ?? 'عام' }}</small>
+        <small class="text-muted mb-1">{{ $product->type->name ?? ($product->section->name ?? 'عام') }}</small>
         
         <h6 class="card-title fw-bold text-dark mb-2 text-truncate">
-            <a href="{{ route('products.show', $product->id ?? 1) }}" class="text-decoration-none text-dark stretched-link">
+            {{-- استخدام نفس $productUrl من الأعلى --}}
+            <a href="{{ $productUrl }}" class="text-decoration-none text-dark stretched-link">
                 {{ $product->name ?? 'اسم المنتج' }}
             </a>
         </h6>
@@ -64,10 +120,10 @@
         <div class="mt-auto d-flex align-items-center justify-content-between">
             <div class="price-wrapper">
                 @if($hasDiscount)
-                    <span class="text-danger fw-bolder fs-5">{{ number_format($finalPrice) }} ₪</span>
-                    <small class="text-muted text-decoration-line-through ms-1">{{ number_format($price) }}</small>
+                    <span class="text-danger fw-bolder fs-5">{{ number_format($finalPrice, 2) }} ₪</span>
+                    <small class="text-muted text-decoration-line-through ms-1">{{ number_format($price, 2) }} ₪</small>
                 @else
-                    <span class="fw-bolder fs-5 text-dark">{{ number_format($price) }} ₪</span>
+                    <span class="fw-bolder fs-5 text-dark">{{ number_format($price, 2) }} ₪</span>
                 @endif
             </div>
             
