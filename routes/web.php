@@ -14,7 +14,6 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PageController;
 
-
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
