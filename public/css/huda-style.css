@@ -1,0 +1,438 @@
+/**
+ * Huda Beauty Style - Premium E-commerce Design
+ * Created for OOPSSKIN
+ * Version: 1.0.0
+ */
+
+/* ========================================
+   VARIABLES & RESET
+   ======================================== */
+
+:root {
+    /* Brand Colors */
+    --huda-black: #000000;
+    --huda-pink: #E91E63;
+    --huda-pink-light: #FF6B9D;
+    --huda-gold: #D4AF37;
+    
+    /* Neutral Colors */
+    --bg-white: #FFFFFF;
+    --bg-cream: #FAF9F6;
+    --bg-light-gray: #F9F9F9;
+    --text-dark: #000000;
+    --text-gray: #666666;
+    --text-light: #999999;
+    --border-color: #f0f0f0;
+    
+    /* Spacing */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 40px;
+    --spacing-xl: 60px;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    --shadow-xl: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+
+.huda-heading-xl {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 1px;
+}
+
+.huda-heading-lg {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.huda-heading-md {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.huda-text-uppercase {
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+
+.huda-text-small {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.huda-btn {
+    padding: 14px 40px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+}
+
+.huda-btn-primary {
+    background: var(--huda-black);
+    color: white;
+}
+
+.huda-btn-primary:hover {
+    background: var(--huda-pink);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.huda-btn-secondary {
+    background: transparent;
+    color: var(--huda-black);
+    border: 2px solid var(--huda-black);
+}
+
+.huda-btn-secondary:hover {
+    background: var(--huda-black);
+    color: white;
+}
+
+.huda-btn-pink {
+    background: var(--huda-pink);
+    color: white;
+}
+
+.huda-btn-pink:hover {
+    background: var(--huda-pink-light);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(233, 30, 99, 0.3);
+}
+
+.huda-btn-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: var(--huda-black);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-md);
+}
+
+.huda-btn-icon:hover {
+    background: var(--huda-pink);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* ========================================
+   CARDS
+   ======================================== */
+
+.huda-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    transition: var(--transition-normal);
+    overflow: hidden;
+}
+
+.huda-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--huda-pink);
+}
+
+.huda-card-image {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-light-gray);
+}
+
+.huda-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.huda-card:hover .huda-card-image img {
+    transform: scale(1.08);
+}
+
+.huda-card-body {
+    padding: 20px;
+}
+
+.huda-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.huda-card-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+
+.huda-badge {
+    padding: 6px 14px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 0;
+    display: inline-block;
+}
+
+.huda-badge-new {
+    background: var(--huda-pink);
+    color: white;
+}
+
+.huda-badge-sale {
+    background: #ff0000;
+    color: white;
+}
+
+.huda-badge-featured {
+    background: var(--huda-gold);
+    color: white;
+}
+
+/* ========================================
+   SECTIONS
+   ======================================== */
+
+.huda-section {
+    padding: 60px 0;
+}
+
+.huda-section-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.huda-section-heading {
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.huda-section-subtitle {
+    font-size: 1rem;
+    color: var(--text-gray);
+}
+
+/* ========================================
+   PRODUCT GRID
+   ======================================== */
+
+.huda-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .huda-product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+}
+
+/* ========================================
+   OVERLAY EFFECTS
+   ======================================== */
+
+.huda-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(233, 30, 99, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-normal);
+}
+
+.huda-overlay-trigger:hover .huda-overlay {
+    opacity: 1;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.huda-fade-in {
+    animation: fadeIn var(--transition-slow) ease;
+}
+
+.huda-fade-in-up {
+    animation: fadeInUp var(--transition-slow) ease;
+}
+
+/* ========================================
+   UTILITIES
+   ======================================== */
+
+.huda-text-center {
+    text-align: center;
+}
+
+.huda-text-pink {
+    color: var(--huda-pink);
+}
+
+.huda-text-gold {
+    color: var(--huda-gold);
+}
+
+.huda-bg-cream {
+    background-color: var(--bg-cream);
+}
+
+.huda-bg-black {
+    background-color: var(--huda-black);
+}
+
+.huda-bg-pink {
+    background-color: var(--huda-pink);
+}
+
+.huda-mt-sm { margin-top: var(--spacing-sm); }
+.huda-mt-md { margin-top: var(--spacing-md); }
+.huda-mt-lg { margin-top: var(--spacing-lg); }
+.huda-mt-xl { margin-top: var(--spacing-xl); }
+
+.huda-mb-sm { margin-bottom: var(--spacing-sm); }
+.huda-mb-md { margin-bottom: var(--spacing-md); }
+.huda-mb-lg { margin-bottom: var(--spacing-lg); }
+.huda-mb-xl { margin-bottom: var(--spacing-xl); }
+
+.huda-py-sm { padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
+.huda-py-md { padding-top: var(--spacing-md); padding-bottom: var(--spacing-md); }
+.huda-py-lg { padding-top: var(--spacing-lg); padding-bottom: var(--spacing-lg); }
+.huda-py-xl { padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl); }
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 991px) {
+    :root {
+        --spacing-lg: 30px;
+        --spacing-xl: 45px;
+    }
+    
+    .huda-heading-xl {
+        font-size: 2.5rem;
+    }
+    
+    .huda-heading-lg {
+        font-size: 2rem;
+    }
+    
+    .huda-heading-md {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .huda-heading-xl {
+        font-size: 2rem;
+    }
+    
+    .huda-heading-lg {
+        font-size: 1.5rem;
+    }
+    
+    .huda-btn {
+        padding: 12px 30px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+    .huda-btn,
+    .huda-overlay,
+    [class*="hover"] {
+        display: none !important;
+    }
+}

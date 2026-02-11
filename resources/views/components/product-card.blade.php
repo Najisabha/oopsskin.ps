@@ -148,30 +148,33 @@
     </div>
 </div>
 
-{{-- CSS مخصص لهذا الكومبوننت --}}
+{{-- Huda Beauty Style Product Card CSS --}}
 <style>
     .product-card-pro {
         background: #fff;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+        border-radius: 0;
     }
 
     .product-card-pro:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+        border-color: #E91E63;
     }
 
-    /* تنسيق الصورة */
+    /* Product Image */
     .product-image-wrapper {
-        height: 200px;
+        height: 220px;
         overflow: hidden;
-        background-color: #f8f9fa;
+        background-color: #fafafa;
+        position: relative;
     }
     
-    /* على الشاشات الكبيرة */
     @media (min-width: 768px) {
         .product-image-wrapper {
-            height: 260px;
+            height: 280px;
         }
     }
 
@@ -179,20 +182,33 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .product-card-pro:hover .product-img {
-        transform: scale(1.1); /* تأثير الزوم */
+        transform: scale(1.08);
     }
 
-    /* أزرار الإجراءات */
+    /* Product Badges */
+    .product-badges {
+        z-index: 3;
+    }
+
+    .product-badges .badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        letter-spacing: 0.5px;
+        border-radius: 0;
+    }
+
+    /* Action Buttons */
     .product-actions {
         opacity: 0;
         visibility: hidden;
-        transform: translate(-50%, -40%); /* يبدأ من أعلى قليلاً */
-        transition: all 0.3s ease;
-        z-index: 2;
+        transform: translate(-50%, -45%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 3;
     }
 
     .product-card-pro:hover .product-actions {
@@ -202,26 +218,85 @@
     }
 
     .action-btn {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: none;
-        transition: all 0.2s;
+        background: white;
+        color: #000;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        border-radius: 50%;
     }
 
     .action-btn:hover {
-        background-color: #0d6efd; /* لون البراند الأساسي */
+        background-color: #E91E63;
         color: white;
+        transform: scale(1.1);
     }
 
-    /* رابط الكارد الكامل لا يجب أن يغطي أزرار الإجراءات */
+    /* Card Body */
+    .product-card-pro .card-body {
+        padding: 20px 15px;
+    }
+
+    .product-card-pro .card-body small {
+        font-size: 0.75rem;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .product-card-pro .card-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.4;
+        min-height: 40px;
+    }
+
+    .product-card-pro .card-title a {
+        transition: color 0.3s ease;
+    }
+
+    .product-card-pro .card-title a:hover {
+        color: #E91E63 !important;
+    }
+
+    /* Price */
+    .price-wrapper .text-danger {
+        color: #E91E63 !important;
+        font-weight: 800;
+    }
+
+    .price-wrapper .text-dark {
+        font-weight: 800;
+    }
+
+    /* Rating Stars */
+    .bi-star-fill {
+        color: #FFD700;
+    }
+
+    .bi-star {
+        color: #ddd;
+    }
+
+    /* Links */
     .stretched-link::after {
         z-index: 1;
     }
     
-    .product-actions, .product-badges {
-        z-index: 2; /* التأكد من أن الأزرار فوق الرابط */
+    .product-actions, 
+    .product-badges {
+        z-index: 3;
+    }
+
+    /* Quick Buy Button (Mobile) */
+    .z-index-2 {
+        z-index: 2 !important;
     }
 </style>

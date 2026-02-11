@@ -14,8 +14,13 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PageController;
 
-// Home
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// Home - Huda Beauty Style (Pink Theme)
+Route::get('/', function() {
+    return view('huda-home');
+})->name('home');
+
+// Old Home (Backup)
+Route::get('/old-home', [HomeController::class, 'index'])->name('old.home');
 
 // Main Categories (الأصناف الرئيسية)
 Route::get('/main-categories', [MainCategoryController::class, 'index'])->name('main-categories.index');

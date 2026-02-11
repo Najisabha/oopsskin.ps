@@ -14,44 +14,78 @@
     
     <style>
         :root {
-            --brand-primary: #d63384;
-            --brand-dark: #121212;
-            --brand-accent: #ffc107;
-            --bg-light: #fdfdfd;
-            --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --brand-primary: #000000;
+            --brand-secondary: #E91E63;
+            --brand-accent: #FF6B9D;
+            --brand-gold: #D4AF37;
+            --bg-light: #FFFFFF;
+            --bg-cream: #FAF9F6;
+            --text-dark: #000000;
+            --text-gray: #666666;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-light);
-            color: var(--brand-dark);
+            color: var(--text-dark);
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        /* --- Luxury Navbar --- */
+        /* --- Top Announcement Bar (Like Huda Beauty) --- */
+        .announcement-bar {
+            background: var(--brand-primary);
+            color: white;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .announcement-bar a {
+            color: white;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        /* --- Modern Navbar (Huda Beauty Style) --- */
         .top-navbar {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: var(--bg-light);
+            border-bottom: 1px solid #f0f0f0;
             padding: 15px 0;
             transition: var(--transition);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .navbar-brand {
             font-family: 'Playfair Display', serif;
             font-weight: 800;
-            font-size: 1.8rem;
-            letter-spacing: 1px;
-            color: var(--brand-dark) !important;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            color: var(--brand-primary) !important;
+            text-transform: uppercase;
         }
 
         .nav-link {
             font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--brand-dark) !important;
+            font-size: 0.75rem;
+            color: var(--text-dark) !important;
             text-transform: uppercase;
+            letter-spacing: 1px;
             padding: 0.5rem 1rem !important;
             position: relative;
+            transition: var(--transition);
         }
 
         .nav-link::after {
@@ -61,142 +95,243 @@
             left: 50%;
             width: 0;
             height: 2px;
-            background: var(--brand-primary);
+            background: var(--brand-secondary);
             transition: var(--transition);
             transform: translateX(-50%);
         }
 
-        .nav-link:hover::after {
-            width: 70%;
+        .nav-link:hover {
+            color: var(--brand-secondary) !important;
         }
 
-        /* --- Search Bar Modern --- */
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        /* --- Search Bar (Huda Beauty Style) --- */
         .search-container {
             position: relative;
-            max-width: 400px;
+            max-width: 350px;
             width: 100%;
         }
 
         .search-input {
-            border-radius: 50px;
-            border: 1px solid #eee;
-            padding: 8px 45px 8px 20px;
-            font-size: 0.9rem;
-            background: #f8f8f8;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 10px 45px 10px 15px;
+            font-size: 0.85rem;
+            background: #fafafa;
             transition: var(--transition);
+            width: 100%;
         }
 
         .search-input:focus {
             background: #fff;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            border-color: var(--brand-primary);
+            outline: none;
+            border-color: var(--text-dark);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .search-input::placeholder {
+            color: #999;
+            font-size: 0.85rem;
         }
 
         .search-icon-btn {
             position: absolute;
-            left: 15px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             border: none;
             background: none;
-            color: #888;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 1.1rem;
         }
 
-        /* --- Icons & Badges --- */
+        .search-icon-btn:hover {
+            color: var(--text-dark);
+        }
+
+        /* --- Icons & Badges (Minimalist) --- */
         .action-icon {
-            font-size: 1.3rem;
-            color: var(--brand-dark);
+            font-size: 1.4rem;
+            color: var(--text-dark);
             position: relative;
             transition: var(--transition);
+            text-decoration: none;
         }
 
         .action-icon:hover {
-            color: var(--brand-primary);
-            transform: translateY(-2px);
+            color: var(--brand-secondary);
         }
 
         .cart-badge {
             position: absolute;
-            top: -5px;
+            top: -8px;
             right: -10px;
-            background: var(--brand-primary);
+            background: var(--brand-secondary);
             color: white;
             font-size: 0.65rem;
-            width: 18px;
-            height: 18px;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #fff;
+            border: 2px solid white;
         }
 
-        /* --- Dropdowns Luxury --- */
+        /* --- Dropdowns (Clean & Modern) --- */
         .dropdown-menu {
-            border: none;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
-            border-radius: 12px;
-            padding: 15px;
-            animation: fadeIn 0.3s ease;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 0;
+            padding: 20px;
+            margin-top: 10px;
+            min-width: 220px;
+            animation: slideDown 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .dropdown-item {
-            border-radius: 8px;
-            padding: 8px 15px;
-            font-weight: 600;
+            border-radius: 0;
+            padding: 10px 15px;
+            font-weight: 500;
             font-size: 0.85rem;
+            color: var(--text-dark);
             transition: var(--transition);
+            text-transform: none;
         }
 
         .dropdown-item:hover {
-            background: var(--secondary-color);
-            color: var(--brand-primary);
+            background: var(--bg-cream);
+            color: var(--brand-secondary);
             padding-right: 20px;
         }
 
-        /* --- Footer Luxury --- */
+        .dropdown-divider {
+            margin: 15px 0;
+            border-color: #f0f0f0;
+        }
+
+        /* --- Footer (Premium Black Style) --- */
         .footer {
-            background: #090909;
-            color: #fff;
-            padding: 80px 0 30px;
+            background: var(--brand-primary);
+            color: #ffffff;
+            padding: 70px 0 25px;
+            margin-top: 80px;
         }
 
         .footer-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 800;
             margin-bottom: 25px;
-            color: #fff;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .footer-link {
-            color: #999;
+            color: #cccccc;
             text-decoration: none;
             display: block;
             margin-bottom: 12px;
+            font-size: 0.9rem;
             transition: var(--transition);
         }
 
         .footer-link:hover {
-            color: var(--brand-primary);
-            transform: translateX(-5px);
+            color: var(--brand-secondary);
+            transform: translateX(-3px);
         }
 
-        /* --- Floating Action Button (Mobile) --- */
+        .footer .social-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .footer .social-icon:hover {
+            background: var(--brand-secondary);
+            transform: translateY(-3px);
+        }
+
+        /* --- Buttons (Huda Beauty Style) --- */
+        .btn-primary-brand {
+            background: var(--text-dark);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            border-radius: 0;
+        }
+
+        .btn-primary-brand:hover {
+            background: var(--brand-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
+        }
+
+        .btn-secondary-brand {
+            background: transparent;
+            color: var(--text-dark);
+            border: 2px solid var(--text-dark);
+            padding: 12px 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            border-radius: 0;
+        }
+
+        .btn-secondary-brand:hover {
+            background: var(--text-dark);
+            color: white;
+        }
+
+        /* --- Mobile Responsive --- */
         @media (max-width: 991px) {
-            .navbar-brand { font-size: 1.4rem; }
+            .navbar-brand { 
+                font-size: 1.3rem;
+                letter-spacing: 1px;
+            }
             .desktop-nav { display: none; }
+            .search-container { max-width: 100%; }
         }
     </style>
     @stack('styles')
 </head>
 <body>
 
-    <nav class="top-navbar sticky-top">
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="container">
+            <p class="mb-0">
+                🎉 شحن مجاني للطلبات فوق 200₪ | <a href="{{ route('products.index') }}">تسوقي الآن</a>
+            </p>
+        </div>
+    </div>
+
+    <nav class="top-navbar">
         <div class="container">
             <div class="row align-items-center">
                 
@@ -310,45 +445,65 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="row g-5">
+            <div class="row g-5 mb-5">
                 <div class="col-lg-4 col-md-6">
-                    <h5 class="footer-title">OOPSSKIN</h5>
-                    <p class="text-muted" style="line-height: 2;">
+                    <h5 class="footer-title mb-4">OOPSSKIN</h5>
+                    <p class="text-white-50 mb-4" style="line-height: 1.8; font-size: 0.9rem;">
                         وجهتِك الأولى لعالم الجمال الفاخر. نختار منتجاتنا بعناية فائقة لنضمن لكِ الجودة والأناقة التي تستحقينها.
                     </p>
                     <div class="d-flex gap-3 mt-4">
-                        <a href="#" class="fs-5 text-white"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="fs-5 text-white"><i class="bi bi-snapchat"></i></a>
-                        <a href="#" class="fs-5 text-white"><i class="bi bi-tiktok"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-snapchat"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-tiktok"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
                     </div>
                 </div>
-                <div class="col-lg-2 col-md-3">
-                    <h6 class="text-white fw-bold mb-4">التسوق</h6>
+                <div class="col-lg-2 col-md-3 col-6">
+                    <h6 class="footer-title">التسوق</h6>
                     <a href="{{ route('products.index') }}" class="footer-link">جميع المنتجات</a>
                     <a href="{{ route('categories.index') }}" class="footer-link">الفئات</a>
                     <a href="#" class="footer-link">وصل حديثاً</a>
                     <a href="#" class="footer-link">الأكثر مبيعاً</a>
+                    <a href="#" class="footer-link">العروض الخاصة</a>
                 </div>
-                <div class="col-lg-2 col-md-3">
-                    <h6 class="text-white fw-bold mb-4">الدعم</h6>
+                <div class="col-lg-2 col-md-3 col-6">
+                    <h6 class="footer-title">الدعم</h6>
                     <a href="{{ route('about') }}" class="footer-link">من نحن</a>
                     <a href="{{ route('contact') }}" class="footer-link">تواصل معنا</a>
                     <a href="{{ route('story') }}" class="footer-link">قصتنا</a>
                     <a href="#" class="footer-link">سياسة الخصوصية</a>
+                    <a href="#" class="footer-link">الشحن والتوصيل</a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <h6 class="text-white fw-bold mb-4">النشرة البريدية</h6>
-                    <p class="small text-muted mb-4">اشتركي للحصول على عروض حصرية وتحديثات الجمال.</p>
-                    <form class="d-flex gap-2">
-                        <input type="email" class="form-control bg-dark border-0 text-white p-3" placeholder="بريدك الإلكتروني">
-                        <button class="btn btn-primary px-4 border-0" style="background: var(--brand-primary);">اشتراك</button>
+                    <h6 class="footer-title">اشتركي معنا</h6>
+                    <p class="text-white-50 mb-4" style="font-size: 0.9rem;">
+                        احصلي على آخر العروض والمنتجات الجديدة مباشرة على بريدك الإلكتروني.
+                    </p>
+                    <form class="d-flex flex-column gap-3">
+                        <input type="email" class="form-control border-0 p-3" 
+                               placeholder="أدخلي بريدك الإلكتروني" 
+                               style="background: rgba(255,255,255,0.1); color: white; border-radius: 0;">
+                        <button class="btn btn-primary-brand w-100">اشتراك الآن</button>
                     </form>
                 </div>
             </div>
-            <div class="border-top border-secondary mt-5 pt-4 text-center">
-                <p class="small text-muted mb-0">
-                    &copy; {{ date('Y') }} <strong>OOPSSKIN</strong>. صُنع بكل حب لجمالك.
-                </p>
+            
+            <div class="border-top pt-4 mt-4" style="border-color: rgba(255,255,255,0.1) !important;">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        <p class="mb-0" style="font-size: 0.85rem; color: #999;">
+                            &copy; {{ date('Y') }} <strong>OOPSSKIN</strong>. جميع الحقوق محفوظة.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="d-flex justify-content-center justify-content-md-end gap-3">
+                            <i class="bi bi-credit-card fs-4" style="color: #999;"></i>
+                            <i class="bi bi-paypal fs-4" style="color: #999;"></i>
+                            <i class="bi bi-apple fs-4" style="color: #999;"></i>
+                            <i class="bi bi-google fs-4" style="color: #999;"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
