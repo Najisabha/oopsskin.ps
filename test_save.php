@@ -28,6 +28,7 @@ try {
     ]);
     echo "✓ Eloquent create successful! User ID: " . $user->id . "\n\n";
 
+    
     // Test 3: Eloquent save
     echo "Test 3: Eloquent save...\n";
     $user2 = new User();
