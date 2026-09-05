@@ -2,16 +2,18 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/dm-sans";
 @import "@fontsource-variable/noto-sans-arabic";
+@import "@fontsource/chewy";
+@import "@fontsource-variable/estedad";
 
 :root {
   --background: #fffdfb;
   --foreground: #34262c;
-  --primary: #770d3d;
+  --primary: #c2185b;
   --primary-foreground: #ffffff;
-  --accent: #db949d;
-  --accent-foreground: #4f102c;
-  --secondary: #f7e9e9;
-  --secondary-foreground: #770d3d;
+  --accent: #ec4899;
+  --accent-foreground: #500724;
+  --secondary: #fce7f3;
+  --secondary-foreground: #c2185b;
   --muted: #f4efeb;
   --muted-foreground: #635d60;
   --card: #ffffff;
@@ -20,12 +22,13 @@
   --popover-foreground: #34262c;
   --border: #e9dedd;
   --input: #dfd0d1;
-  --ring: #770d3d;
+  --ring: #c2185b;
   --destructive: #b42318;
   --radius: 0.75rem;
   --font-body: "DM Sans Variable", "Noto Sans Arabic Variable", sans-serif;
-  --font-heading: "DM Sans Variable", "Noto Sans Arabic Variable", sans-serif;
-  --font-arabic: "Noto Sans Arabic Variable", sans-serif;
+  --font-heading: "Chewy", "Estedad Variable", cursive;
+  --font-arabic: "Estedad Variable", sans-serif;
+  --font-arabic-heading: "Estedad Variable", sans-serif;
 }
 @theme inline {
   --color-background: var(--background);
@@ -59,14 +62,14 @@
   body { @apply bg-background text-foreground antialiased; font-family: var(--font-body); }
   html[lang="ar"] body { font-family: var(--font-arabic); }
   h1, h2, h3, h4 { font-family: var(--font-heading); text-wrap: balance; }
-  html[lang="ar"] :is(h1,h2,h3,h4) { font-family: var(--font-arabic); }
+  html[lang="ar"] :is(h1,h2,h3,h4) { font-family: var(--font-arabic-heading); }
   button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   button:not(:disabled), select { cursor: pointer; }
   :focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
   ::selection { background: var(--accent); color: var(--accent-foreground); }
 }
 @utility page-container { width: min(100% - 3rem, 1280px); margin-inline: auto; }
-@utility section-space { padding-block: clamp(3.5rem, 7vw, 6rem); }
+@utility section-space { padding-block: clamp(3.5rem, 7vw, 3rem); }
 @utility eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.17em; text-transform: uppercase; }
 @utility heading { font-size: clamp(1.9rem, 3.6vw, 3.2rem); font-weight: 650; line-height: 1.25; letter-spacing: -0.045em; }
 @utility field { display: grid; gap: 0.6rem; }

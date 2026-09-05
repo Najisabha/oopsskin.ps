@@ -7,6 +7,7 @@ import { registerSchema } from "../src/lib/validation";
 import type { User } from "../src/lib/types";
 
 // Password can be supplied through ADMIN_PASSWORD without appearing in arguments/history.
+async function main() {
 const readline = createInterface({ input: stdin, output: stdout });
 try {
   const email = process.env.ADMIN_EMAIL || await readline.question("Admin email: ");
@@ -31,3 +32,6 @@ try {
   db().prepare("INSERT INTO users VALUES (?,?,?,?)").run(user.id,user.email,hashPassword(input.password),JSON.stringify(user));
   console.log(`Admin account created for ${user.email}. Sign in at /login.`);
 } catch(e) { console.error(e instanceof Error ? e.message : e); process.exitCode=1; } finally { readline.close(); }
+
+}
+void main();

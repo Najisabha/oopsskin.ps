@@ -35,14 +35,14 @@ export function StoreProvider({ children, initialLanguage, settings }: { childre
   const toggleLanguage = () => { const next = language === "en" ? "ar" : "en"; setLanguage(next); document.documentElement.lang = next; document.documentElement.dir = next === "ar" ? "rtl" : "ltr"; document.cookie = `oopsskin_language=${next};path=/;max-age=31536000;SameSite=Lax`; };
   const mutate = (fn: () => Promise<void>) => { const next = queue.current.then(fn, fn); queue.current = next.catch(() => {}); return next; };
   const updateCart = (id: string, quantity: number) => mutate(async () => { const result = await api<{ cart: Cart }>("cart", "PATCH", { productId: id, quantity }); assignCart(result.cart); });
-  const addToCart = (id: string, quantity = 1) => mutate(async () => { const current = cartRef.current.items.find(i => i.productId === id)?.quantity || 0; const result = await api<{ cart: Cart }>("cart", "PATCH", { productId: id, quantity: current + quantity }); assignCart(result.cart); toast.success(t("Added to your bag", "تمت الإضافة إلى السلة")); });
+  const addToCart = (id: string, quantity = 1) => mutate(async () => { const current = cartRef.current.items.find(i => i.productId === id)?.quantity || 0; const result = await api<{ cart: Cart }>("cart", "PATCH", { productId: id, quantity: current + quantity }); assignCart(result.cart); toast.success(t("Added to your bag", "ضفناه على سلتك")); });
   const applyVoucher = async (code: string) => { const result = await api<{ cart: Cart }>("cart/voucher", "POST", { code }); assignCart(result.cart); };
   const logout = async () => { await api("auth/logout", "POST", {}); setUser(null); await refreshCart(); };
   const toggleFavorite = (id: string) => {
     const previous = parseFavorites(readFavorites());
     const next = previous.includes(id) ? previous.filter(v => v !== id) : [...previous, id];
     try { localStorage.setItem("oopsskin_favorites", JSON.stringify(next)); window.dispatchEvent(new Event("oopsskin:favorites")); }
-    catch { toast.error(t("Your browser could not save favorites.", "تعذر حفظ المفضلة في المتصفح.")); }
+    catch { toast.error(t("Your browser could not save favorites.", "المتصفح ما قدر يحفظ المفضلة.")); }
   };
   const currency = (value: number) => new Intl.NumberFormat(language === "ar" ? "ar-PS" : "en-IL", { style: "currency", currency: "ILS", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
   return <Store.Provider value={{ language, toggleLanguage, t, currency, user, setUser, cart, ready, loadingError, refreshCart, updateCart, addToCart, applyVoucher, logout, favorites, toggleFavorite, settings }}>{children}<Toaster richColors position="bottom-center" dir={language === "ar" ? "rtl" : "ltr"} /></Store.Provider>;
