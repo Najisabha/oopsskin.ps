@@ -1,0 +1,20 @@
+const messages: Record<string,string> = {
+  "Please sign in to continue.": "يرجى تسجيل الدخول للمتابعة.",
+  "Administrator access required.": "هذه الصفحة مخصصة لإدارة المتجر.",
+  "Product not found.": "المنتج غير موجود.",
+  "Too many attempts. Please try again in 15 minutes.": "محاولات كثيرة. يرجى المحاولة بعد 15 دقيقة.",
+  "An account with this email already exists.": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+  "Email or password is incorrect.": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+  "The requested quantity is not available.": "الكمية المطلوبة غير متوفرة.",
+  "This voucher is invalid, expired, or its minimum order has not been reached.": "القسيمة غير صالحة أو منتهية أو لم يتم الوصول للحد الأدنى للطلب.",
+  "Your shopping bag is empty.": "سلة التسوق فارغة.",
+  "Request key already used.": "تم استخدام معرّف الطلب. يرجى إعادة تحميل الصفحة.",
+  "Order not found.": "الطلب غير موجود.",
+  "This order status transition is not allowed.": "لا يمكن تغيير حالة الطلب بهذه الطريقة.",
+  "Voucher not found.": "القسيمة غير موجودة.",
+  "Request origin is not allowed.": "مصدر الطلب غير مسموح.",
+  "Request too large.": "حجم البيانات أكبر من المسموح.",
+  "Invalid JSON.": "بيانات الطلب غير صالحة.",
+  "Route not found.": "المسار غير موجود.",
+};
+export function arabicError(message: string) { return messages[message] || (message.includes("unavailable in the requested quantity") ? "أحد المنتجات غير متوفر بالكمية المطلوبة. يرجى مراجعة السلة." : "تعذر إكمال العملية. يرجى المحاولة مرة أخرى."); }

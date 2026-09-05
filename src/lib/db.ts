@@ -18,7 +18,6 @@ export function db() {
     CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, user_id TEXT, request_key TEXT NOT NULL UNIQUE, owner TEXT NOT NULL, data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS vouchers (id TEXT PRIMARY KEY, data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS settings (id TEXT PRIMARY KEY, data TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS subscribers (email TEXT PRIMARY KEY, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS login_attempts (key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at INTEGER NOT NULL);
     CREATE UNIQUE INDEX IF NOT EXISTS products_external ON products(json_extract(data, '$.externalSource'), json_extract(data, '$.externalId')) WHERE json_extract(data, '$.externalId') IS NOT NULL;
   `);

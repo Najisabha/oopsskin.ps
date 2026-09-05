@@ -1,11 +1,13 @@
+import { arabicError } from "@/lib/api-messages";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { all, db, get, put, products, settings, transaction } from "@/lib/db";
 import { cartOwner, currentUser, endSession, hashPassword, limitAuth, startSession, verifyPassword } from "@/lib/auth";
+import { placeOrder, updateOrderStatus } from "@/lib/orders";
 import { ApiError, quote, readCart, saveCart } from "@/lib/commerce";
 import { authSchema, cartSchema, checkoutSchema, productSchema, profileSchema, registerSchema, settingsSchema, voucherSchema } from "@/lib/validation";
-import type { Order, Product, User, Voucher } from "@/lib/types";
+import type { Product, User, Voucher } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -97,26 +99,13 @@ async function handler(req: NextRequest, context: Context) {
     if (path === "orders" && method === "POST") {
       const customer = checkoutSchema.parse(await body());
       const owner = await cartOwner(user);
-      const order = transaction(() => {
-        const duplicate = db().prepare("SELECT data,owner FROM orders WHERE request_key=?").get(customer.requestKey);
-        if (duplicate) { if (duplicate.owner !== owner) throw new ApiError("Request key already used.", 409); return JSON.parse(String(duplicate.data)) as Order; }
-        const stored = readCart(owner);
-        if (!stored.items.length) throw new ApiError("Your shopping bag is empty.");
-        const cart = quote(stored.items, stored.voucherCode, true);
-        const order: Order = { id: `OOPS-${randomUUID().slice(0, 8).toUpperCase()}`, userId: user?.id || null, name: customer.name, email: customer.email, phone: customer.phone, address: customer.address, city: customer.city, notes: customer.notes, items: cart.items.map(i => ({ productId: i.productId, name: i.product.name, price: i.product.price, quantity: i.quantity })), subtotal: cart.subtotal, shipping: cart.shipping, discount: cart.discount, total: cart.total, voucherCode: cart.voucherCode, status: "pending", createdAt: new Date().toISOString(), paymentMethod: "cash-on-delivery" };
-        for (const item of cart.items) put("products", item.productId, { ...item.product, stock: item.product.stock - item.quantity });
-        if (cart.voucherCode) { const voucher = get<Voucher>("vouchers", cart.voucherCode)!; put("vouchers", voucher.code, { ...voucher, used: voucher.used + 1 }); }
-        db().prepare("INSERT INTO orders VALUES (?,?,?,?,?)").run(order.id, user?.id || null, customer.requestKey, owner, JSON.stringify(order));
-        saveCart(owner, { items: [], voucherCode: "" });
-        return order;
-      });
+      const order = placeOrder(owner, user?.id || null, customer);
       return json({ order }, 201);
     }
     if (path === "orders" && method === "GET") { const account = requireUser(); return json({ orders: db().prepare("SELECT data FROM orders WHERE user_id=? ORDER BY rowid DESC").all(account.id).map(r => JSON.parse(String(r.data))) }); }
-    if (path === "newsletter" && method === "POST") { const { email } = z.object({ email: z.email().max(254).transform(v => v.toLowerCase()) }).parse(await body()); db().prepare("INSERT OR IGNORE INTO subscribers VALUES (?,?)").run(email, new Date().toISOString()); return json({ ok: true }); }
     if (parts[0] === "admin") {
       requireAdmin();
-      if (path === "admin/overview" && method === "GET") return json({ products: all<Product>("products"), orders: db().prepare("SELECT data FROM orders ORDER BY rowid DESC").all().map(r => JSON.parse(String(r.data))), customers: db().prepare("SELECT data FROM users").all().map(r => JSON.parse(String(r.data))), vouchers: all<Voucher>("vouchers"), settings: settings(), subscribers: Number(db().prepare("SELECT count(*) AS count FROM subscribers").get()!.count) });
+      if (path === "admin/overview" && method === "GET") return json({ products: all<Product>("products"), orders: db().prepare("SELECT data FROM orders ORDER BY rowid DESC").all().map(r => JSON.parse(String(r.data))), customers: db().prepare("SELECT data FROM users").all().map(r => JSON.parse(String(r.data))), vouchers: all<Voucher>("vouchers"), settings: settings() });
       if (parts[1] === "products" && ["POST", "PATCH"].includes(method)) {
         const data = productSchema.parse(await body());
         const old = parts[2] ? get<Product>("products", parts[2]) : undefined;
@@ -128,18 +117,7 @@ async function handler(req: NextRequest, context: Context) {
       if (parts[1] === "products" && parts[2] && method === "DELETE") { const old = get<Product>("products", parts[2]); if (!old) throw new ApiError("Product not found.", 404); put("products", old.id, { ...old, active: false }); return json({ ok: true }); }
       if (parts[1] === "orders" && parts[2] && method === "PATCH") {
         const { status } = z.object({ status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]) }).parse(await body());
-        const order = transaction(() => {
-          const row = db().prepare("SELECT data FROM orders WHERE id=?").get(parts[2]);
-          if (!row) throw new ApiError("Order not found.", 404);
-          const old: Order = JSON.parse(String(row.data));
-          const transitions: Record<Order["status"], Order["status"][]> = { pending: ["confirmed", "cancelled"], confirmed: ["processing", "cancelled"], processing: ["shipped", "cancelled"], shipped: ["delivered"], delivered: [], cancelled: [] };
-          if (old.status === status) return old;
-          if (!transitions[old.status].includes(status)) throw new ApiError("This order status transition is not allowed.");
-          if (status === "cancelled") for (const item of old.items) { const product = get<Product>("products", item.productId); if (product) put("products", product.id, { ...product, stock: product.stock + item.quantity }); }
-          const next = { ...old, status };
-          db().prepare("UPDATE orders SET data=? WHERE id=?").run(JSON.stringify(next), old.id);
-          return next;
-        });
+        const order = updateOrderStatus(parts[2],status);
         return json({ order });
       }
       if (parts[1] === "vouchers" && method === "POST") { const data = voucherSchema.parse(await body()); const old = get<Voucher>("vouchers", data.code); put("vouchers", data.code, { ...data, used: old?.used || 0 }); return json({ ok: true }); }
@@ -148,11 +126,11 @@ async function handler(req: NextRequest, context: Context) {
     }
     throw new ApiError("Route not found.", 404);
   } catch (error) {
-    if (error instanceof z.ZodError) return json({ message: error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join("; ") }, 400);
-    if (error instanceof ApiError) return json({ message: error.message }, error.status);
-    if (error instanceof Error && error.message.includes("UNIQUE constraint")) return json({ message: "This record already exists." }, 409);
+    if (error instanceof z.ZodError) return json({ message: error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join("; "), messageAr: "يرجى التحقق من البيانات المدخلة والمحاولة مرة أخرى." }, 400);
+    if (error instanceof ApiError) return json({ message: error.message, messageAr: arabicError(error.message) }, error.status);
+    if (error instanceof Error && error.message.includes("UNIQUE constraint")) return json({ message: "This record already exists.", messageAr: "هذا السجل موجود بالفعل." }, 409);
     console.error("API request failed", error);
-    return json({ message: "Something went wrong. Please try again." }, 500);
+    return json({ message: "Something went wrong. Please try again.", messageAr: "حدث خطأ. يرجى المحاولة مرة أخرى." }, 500);
   }
 }
 export { handler as GET, handler as POST, handler as PATCH, handler as DELETE };
