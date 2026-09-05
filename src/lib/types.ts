@@ -1,0 +1,26 @@
+export type Language = "en" | "ar";
+export type Product = {
+  id: string;
+  name: string;
+  nameAr: string;
+  description: string;
+  descriptionAr: string;
+  price: number;
+  compareAtPrice: number | null;
+  category: string;
+  images: string[];
+  stock: number;
+  badge: "" | "new" | "best-seller";
+  active: boolean;
+  externalId: string | null;
+  externalSource: string | null;
+  syncedAt: string | null;
+  createdAt: string;
+};
+export type User = { id: string; name: string; email: string; phone: string; address: string; city: string; role: "customer" | "admin" };
+export type CartItem = { productId: string; quantity: number };
+export type CartLine = CartItem & { product: Product };
+export type Cart = { items: CartLine[]; subtotal: number; shipping: number; discount: number; total: number; voucherCode: string; warning?: string };
+export type Order = { id: string; userId: string | null; name: string; email: string; phone: string; address: string; city: string; notes: string; items: { productId: string; name: string; price: number; quantity: number }[]; subtotal: number; discount: number; shipping: number; total: number; voucherCode: string; status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled"; createdAt: string; paymentMethod: "cash-on-delivery" };
+export type Voucher = { code: string; percent: number; minimum: number; maxUses: number; used: number; active: boolean; expiresAt: string | null };
+export type StoreSettings = { shippingFee: number; freeShippingThreshold: number; contactEmail: string };

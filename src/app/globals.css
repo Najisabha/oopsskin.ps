@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/noto-sans-arabic";
+
+:root {
+  --background: #fffdfb;
+  --foreground: #34262c;
+  --primary: #770d3d;
+  --primary-foreground: #ffffff;
+  --accent: #db949d;
+  --accent-foreground: #4f102c;
+  --secondary: #f7e9e9;
+  --secondary-foreground: #770d3d;
+  --muted: #f4efeb;
+  --muted-foreground: #635d60;
+  --card: #ffffff;
+  --card-foreground: #34262c;
+  --popover: #ffffff;
+  --popover-foreground: #34262c;
+  --border: #e9dedd;
+  --input: #dfd0d1;
+  --ring: #770d3d;
+  --destructive: #b42318;
+  --radius: 0.75rem;
+  --font-body: "DM Sans Variable", "Noto Sans Arabic Variable", sans-serif;
+  --font-heading: "DM Sans Variable", "Noto Sans Arabic Variable", sans-serif;
+  --font-arabic: "Noto Sans Arabic Variable", sans-serif;
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+@layer base {
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; scroll-padding-top: 145px; }
+  body { @apply bg-background text-foreground antialiased; font-family: var(--font-body); }
+  html[lang="ar"] body { font-family: var(--font-arabic); }
+  h1, h2, h3, h4 { font-family: var(--font-heading); text-wrap: balance; }
+  html[lang="ar"] :is(h1,h2,h3,h4) { font-family: var(--font-arabic); }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  button:not(:disabled), select { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
+  ::selection { background: var(--accent); color: var(--accent-foreground); }
+}
+@utility page-container { width: min(100% - 3rem, 1280px); margin-inline: auto; }
+@utility section-space { padding-block: clamp(3.5rem, 7vw, 6rem); }
+@utility eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.17em; text-transform: uppercase; }
+@utility heading { font-size: clamp(1.9rem, 3.6vw, 3.2rem); font-weight: 650; line-height: 1.25; letter-spacing: -0.045em; }
+@utility field { display: grid; gap: 0.6rem; }
+@utility soft-panel { border: 1px solid var(--border); border-radius: 1rem; background: var(--card); padding: clamp(1.25rem, 3vw, 2rem); }
+html[lang="ar"] .eyebrow { letter-spacing: 0; }
+html[lang="ar"] .heading { letter-spacing: 0; line-height: 1.55; }
+@media (max-width: 640px) { .page-container { width: calc(100% - 2rem); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
