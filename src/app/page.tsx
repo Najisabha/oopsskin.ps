@@ -1,3 +1,3 @@
 import { HomeContent } from "@/components/store/home";
 import { products } from "@/lib/db";
-export default function Home() { return <HomeContent products={products()} />; }
+export default async function Home() { return <HomeContent products={await products()} />; }

@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { DatabaseSync } from "node:sqlite";
+import mongoose from "mongoose";
 import { scryptSync } from "node:crypto";
+async function testDb() {
+  if (mongoose.connection.readyState === 0) await mongoose.connect(process.env.TEST_MONGODB_URI!, { bufferCommands: false });
+  return mongoose.connection;
+}
 const checkout = (requestKey = crypto.randomUUID()) => ({ name: "Test Customer", email: "guest@example.com", phone: "+970599123456", city: "Tulkarm", address: "Test Street 10", notes: "Automated test", requestKey });
 
 test("guest checkout uses server totals, persists, and deduplicates retries", async ({ request }) => {
@@ -18,9 +22,8 @@ test("guest checkout uses server totals, persists, and deduplicates retries", as
   expect((await (await request.get("/api/cart")).json()).cart.items).toHaveLength(0);
   expect((await (await request.post("/api/orders",{data:payload})).json()).order.id).toBe(order.id);
   expect((await (await request.get("/api/products/lipstick-red")).json()).product.stock).toBe(8);
-  const database = new DatabaseSync(process.env.TEST_DATABASE_PATH!);
-  expect(database.prepare("SELECT id FROM orders WHERE id=?").get(order.id)).toBeTruthy();
-  database.close();
+  const connection = await testDb();
+  expect(await connection.collection("orders").findOne({ _id: order.id })).toBeTruthy();
 });
 
 test("account auth merges guest cart and isolates order history", async ({ request, playwright }) => {
@@ -44,12 +47,11 @@ test("account auth merges guest cart and isolates order history", async ({ reque
 });
 
 test("admin changes affect checkout and cancelled stock is restored once", async ({ request }) => {
-  const database = new DatabaseSync(process.env.TEST_DATABASE_PATH!);
+  const connection = await testDb();
   const salt = "12345678901234567890123456789012";
   const hash = `${salt}:${scryptSync("AdminPassword123",salt,64).toString("hex")}`;
-  const admin = {id:"test-admin",name:"Test Admin",email:"admin@example.com",phone:"",address:"",city:"",role:"admin"};
-  database.prepare("INSERT OR IGNORE INTO users VALUES (?,?,?,?)").run(admin.id,admin.email,hash,JSON.stringify(admin));
-  database.close();
+  const admin = {_id:"test-admin",name:"Test Admin",email:"admin@example.com",phone:"",address:"",city:"",role:"admin",passwordHash:hash};
+  await connection.collection<typeof admin>("users").updateOne({ _id: admin._id }, { $setOnInsert: admin }, { upsert: true });
   expect((await request.post("/api/auth/login",{data:{email:admin.email,password:"AdminPassword123"}})).status()).toBe(200);
   const product = {name:"Test Serum",nameAr:"سيروم تجريبي",description:"Testing product",descriptionAr:"منتج تجريبي",price:70,compareAtPrice:80,category:"Skincare",images:["/images/serum.jpg"],stock:2,badge:"new",active:true,externalId:"test-123",externalSource:"test"};
   const created = await request.post("/api/admin/products",{data:product});

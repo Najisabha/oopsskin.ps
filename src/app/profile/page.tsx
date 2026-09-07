@@ -1,6 +1,19 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { OrderModel } from "@/lib/models";
 import { Profile } from "@/components/store/profile";
+import type { Order } from "@/lib/types";
 export const metadata = { title: "حسابي" };
-export default async function Page() { const user = await currentUser(); if (!user) redirect("/login?next=/profile"); const orders = db().prepare("SELECT data FROM orders WHERE user_id=? ORDER BY rowid DESC").all(user.id).map(r => JSON.parse(String(r.data))); return <Profile account={user} orders={orders} />; }
+function toOrder(doc: Record<string, unknown>): Order {
+  const { _id, requestKey: _rk, owner: _o, ...rest } = doc;
+  return { id: _id as string, ...rest } as Order;
+}
+export default async function Page() {
+  const user = await currentUser();
+  if (!user) redirect("/login?next=/profile");
+  await db();
+  const docs = await OrderModel.find({ userId: user.id }).sort({ createdAt: -1 }).lean();
+  const orders = docs.map(d => toOrder(d as Record<string, unknown>));
+  return <Profile account={user} orders={orders} />;
+}

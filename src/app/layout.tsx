@@ -10,5 +10,5 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const language = (await cookies()).get("oopsskin_language")?.value === "en" ? "en" : "ar";
-  return <html lang={language} dir={language === "ar" ? "rtl" : "ltr"}><body><a href="#main-content" className="fixed start-4 top-4 z-100 -translate-y-40 rounded-lg bg-primary p-3 text-primary-foreground focus:translate-y-0">{language === "ar" ? "انتقل للمحتوى" : "Skip to content"}</a><StoreProvider initialLanguage={language} settings={settings()}><Header /><main id="main-content" className="min-h-[55vh]">{children}</main><Footer /></StoreProvider></body></html>;
+  return <html lang={language} dir={language === "ar" ? "rtl" : "ltr"}><body><a href="#main-content" className="fixed start-4 top-4 z-100 -translate-y-40 rounded-lg bg-primary p-3 text-primary-foreground focus:translate-y-0">{language === "ar" ? "انتقل للمحتوى" : "Skip to content"}</a><StoreProvider initialLanguage={language} settings={await settings()}><Header /><main id="main-content" className="min-h-[55vh]">{children}</main><Footer /></StoreProvider></body></html>;
 }

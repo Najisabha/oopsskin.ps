@@ -7,5 +7,5 @@ export default async function CollectionPage({ params, searchParams }: { params:
   const { collection } = await params;
   if (!collections.includes(collection)) notFound();
   const query = await searchParams;
-  return <Catalog products={products()} collection={collection} initialSearch={query.search || ""} initialCategory={query.category || "all"} key={`${collection}-${query.search}-${query.category}`} />;
+  return <Catalog products={await products()} collection={collection} initialSearch={query.search || ""} initialCategory={query.category || "all"} key={`${collection}-${query.search}-${query.category}`} />;
 }
