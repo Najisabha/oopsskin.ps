@@ -2,11 +2,35 @@ import { Schema, model, models, type InferSchemaType } from "mongoose";
 
 const ProductSchema = new Schema({
   _id: { type: String, required: true },
+  id: { type: String },
+  class_id: { type: Schema.Types.Mixed },
+  barcode: { type: Schema.Types.Mixed },
+  item_img: { type: Schema.Types.Mixed },
+  item_pdf: { type: Schema.Types.Mixed },
+  product_prices: { type: Schema.Types.Mixed },
+  unit: { type: Schema.Types.Mixed },
+  tax_class: { type: Schema.Types.Mixed },
+  company_id: { type: Schema.Types.Mixed },
+  trade_id: { type: Schema.Types.Mixed },
+  style_id: { type: Schema.Types.Mixed },
+  model_id: { type: Schema.Types.Mixed },
+  color_id: { type: Schema.Types.Mixed },
+  note: { type: Schema.Types.Mixed },
+  bonus_group: { type: Schema.Types.Mixed },
+  name_e: { type: Schema.Types.Mixed },
+  other_codes: { type: Schema.Types.Mixed },
+  model_no: { type: Schema.Types.Mixed },
+  cost: { type: Schema.Types.Mixed },
+  amount: { type: Schema.Types.Mixed },
+  active_units: { type: Schema.Types.Mixed },
+  measure: { type: Schema.Types.Mixed },
+  storefront: { type: Schema.Types.Mixed },
+  reservedStock: { type: Number, default: 0 },
   name: { type: String, required: true },
   nameAr: { type: String, required: true },
   description: { type: String, required: true },
   descriptionAr: { type: String, required: true },
-  price: { type: Number, required: true },
+  price: { type: Schema.Types.Mixed, required: true },
   compareAtPrice: { type: Number, default: null },
   category: { type: String, required: true },
   images: { type: [String], required: true },
@@ -17,7 +41,7 @@ const ProductSchema = new Schema({
   externalSource: { type: String, default: null },
   syncedAt: { type: String, default: null },
   createdAt: { type: String, required: true },
-}, { versionKey: false });
+}, { versionKey: false, strict: false, id: false });
 ProductSchema.index(
   { externalSource: 1, externalId: 1 },
   { unique: true, partialFilterExpression: { externalId: { $type: "string" } } }
@@ -114,3 +138,6 @@ export const OrderModel = models.Order || model("Order", OrderSchema);
 export const VoucherModel = models.Voucher || model("Voucher", VoucherSchema);
 export const SettingsModel = models.Settings || model("Settings", SettingsSchema);
 export const LoginAttemptModel = models.LoginAttempt || model("LoginAttempt", LoginAttemptSchema);
+
+const SyncStateSchema = new Schema({ _id: String, lockedUntil: Date, runId: String, status: String, startedAt: String, finishedAt: String, error: String, lastSuccess: Schema.Types.Mixed, history: [Schema.Types.Mixed] }, { versionKey: false });
+export const SyncStateModel = models.SyncState || model("SyncState", SyncStateSchema);

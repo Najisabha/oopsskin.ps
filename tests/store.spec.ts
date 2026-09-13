@@ -40,6 +40,9 @@ test("account auth merges guest cart and isolates order history", async ({ reque
   const other = await playwright.request.newContext({baseURL:"http://localhost:3107"});
   expect((await other.get("/api/orders")).status()).toBe(401);
   expect((await other.get("/api/admin/overview")).status()).toBe(401);
+  expect((await other.get("/api/admin/hsabate")).status()).toBe(401);
+  expect((await other.post("/api/admin/hsabate/sync")).status()).toBe(401);
+  expect((await request.post("/api/admin/hsabate/debug")).status()).toBe(403);
   await other.dispose();
   await request.post("/api/auth/logout",{data:{}});
   expect((await (await request.get("/api/auth/current")).json()).user).toBeNull();
@@ -55,8 +58,9 @@ test("admin changes affect checkout and cancelled stock is restored once", async
   expect((await request.post("/api/auth/login",{data:{email:admin.email,password:"AdminPassword123"}})).status()).toBe(200);
   const product = {name:"Test Serum",nameAr:"سيروم تجريبي",description:"Testing product",descriptionAr:"منتج تجريبي",price:70,compareAtPrice:80,category:"Skincare",images:["/images/serum.jpg"],stock:2,badge:"new",active:true,externalId:"test-123",externalSource:"test"};
   const created = await request.post("/api/admin/products",{data:product});
-  expect(created.status()).toBe(201);
-  const id = (await created.json()).product.id;
+  expect(created.status()).toBe(409);
+  const id = "api-owned-test";
+  await connection.collection<{ _id: string } & typeof product & { createdAt: string }>("products").insertOne({ _id: id, ...product, createdAt: new Date().toISOString() });
   expect((await request.post("/api/admin/products",{data:product})).status()).toBe(409);
   expect((await request.post("/api/admin/vouchers",{data:{code:"TEST10",percent:10,minimum:50,maxUses:1,active:true,expiresAt:null}})).status()).toBe(200);
   await request.patch("/api/cart",{data:{productId:id,quantity:1}});
@@ -70,7 +74,9 @@ test("admin changes affect checkout and cancelled stock is restored once", async
   expect((await request.patch(`/api/admin/orders/${order.id}`,{data:{status:"confirmed"}})).status()).toBe(400);
   await request.patch("/api/cart",{data:{productId:id,quantity:1}});
   expect((await request.post("/api/cart/voucher",{data:{code:"TEST10"}})).status()).toBe(400);
-  await request.delete(`/api/admin/products/${id}`);
+  expect((await request.patch(`/api/admin/products/${id}`, {data:product})).status()).toBe(409);
+  expect((await request.delete(`/api/admin/products/${id}`)).status()).toBe(409);
+  await connection.collection("products").updateOne({ externalId: "test-123" }, { $set: { active: false } });
   expect((await request.get(`/api/products/${id}`)).status()).toBe(404);
 });
 
@@ -123,4 +129,36 @@ test("mobile guest purchase works without horizontal overflow", async ({ page })
   await page.getByRole("button",{name:/تأكيد الطلب/}).click();
   await expect(page.getByRole("heading",{name:"شكراً يا حلوة."})).toBeVisible();
   await expect(page.getByText(/OOPS-/)).toBeVisible();
+});
+
+
+test("admin API dashboard renders diagnostics and manual sync feedback", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const connection = await testDb();
+  const salt = "12345678901234567890123456789012";
+  const admin = { _id: "dashboard-admin", name: "Dashboard Admin", email: "dashboard@example.com", role: "admin", passwordHash: `${salt}:${scryptSync("AdminPassword123", salt, 64).toString("hex")}` };
+  await connection.collection<typeof admin>("users").updateOne({ _id: admin._id }, { $set: admin }, { upsert: true });
+  expect((await page.request.post("/api/auth/login", { data: { email: admin.email, password: "AdminPassword123" } })).status()).toBe(200);
+  const state = await (await page.request.get("/api/admin/hsabate")).json();
+  expect(state.endpoint).toBe("https://s.hesabate.com/store_api.php");
+  expect(JSON.stringify(state)).not.toContain("HSABATE_PASSWORD");
+  await page.goto("/admin/hsabate");
+  await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(page.getByRole("heading", { name: "Hsabate product sync" })).toBeVisible();
+  await page.route("**/api/admin/hsabate/debug", route => route.fulfill({ json: { total: 2645, ecommerce: 705, fields: ["id", "name", "price"] } }));
+  await page.getByRole("button", { name: "Test API", exact: true }).click();
+  await expect(page.locator("pre")).toContainText("2645");
+  await page.route("**/api/admin/hsabate/sync", route => route.fulfill({ json: { received: 2645, active: 705, inserted: 2645, updated: 0, archived: 10 } }));
+  await page.getByRole("button", { name: "Sync products now" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Sync completed" })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
+test.afterAll(async () => {
+  if (mongoose.connection.readyState) {
+    if (!mongoose.connection.name.startsWith("oopsskin_test_")) throw new Error("Refusing to clean non-test database");
+    try { for (const collection of await mongoose.connection.db!.collections()) await collection.deleteMany({}); } finally { await mongoose.disconnect(); }
+  }
 });

@@ -7,6 +7,7 @@ type Table = "products" | "vouchers" | "settings";
 const modelFor = { products: ProductModel, vouchers: VoucherModel, settings: SettingsModel } as const;
 
 function toPlain<T>(doc: Record<string, unknown>): T {
+  if (doc.externalSource === "hsabate" && doc.storefront) return { ...(doc.storefront as Product), id: String(doc._id) } as T;
   const { _id, ...rest } = doc;
   return { id: _id, ...rest } as T;
 }
@@ -48,6 +49,17 @@ export async function get<T>(table: Table, id: string): Promise<T | undefined> {
 }
 export async function put<T extends { id?: string } & Record<string, unknown>>(table: Table, id: string, value: T) {
   await db();
+  if (table === "products") {
+    const existing = await ProductModel.findById(id).lean();
+    if (existing?.externalSource === "hsabate") {
+      // Checkout reservations affect availability, never overwrite supplier fields.
+      if (typeof value.stock !== "number") throw new Error("Hsabate products are API managed.");
+      const previous = Number(existing.storefront.stock);
+      const updated = await ProductModel.updateOne({ _id: id, "storefront.stock": previous }, { $inc: { reservedStock: previous - value.stock }, $set: { "storefront.stock": value.stock } });
+      if (!updated.matchedCount) throw new Error("Product availability changed. Please retry.");
+      return;
+    }
+  }
   const { id: _omit, ...rest } = value;
   await modelFor[table].updateOne({ _id: id }, { $set: rest }, { upsert: true });
 }
@@ -62,21 +74,11 @@ export async function settings(): Promise<StoreSettings> {
 export async function transaction<T>(fn: () => Promise<T>): Promise<T> {
   await db();
   const mongoose = await connectMongo();
-  const session = await mongoose.startSession();
   try {
-    let result!: T;
-    await session.withTransaction(async () => {
-      result = await fn();
-    });
-    return result;
+    return await mongoose.connection.transaction(async () => fn());
   } catch (error) {
-    // Standalone MongoDB instances (no replica set) don't support transactions.
-    // Fall back to running the operations without one; Atlas/replica-set deployments use the path above.
-    if (error instanceof Error && /Transaction numbers are only allowed|IllegalOperation/.test(error.message)) {
-      return fn();
-    }
+    // Existing local standalone development databases cannot use transactions.
+    if (error instanceof Error && /Transaction numbers are only allowed|IllegalOperation/.test(error.message)) return fn();
     throw error;
-  } finally {
-    await session.endSession();
   }
 }

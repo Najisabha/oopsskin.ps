@@ -46,15 +46,19 @@ Edit `src/app/globals.css`. Semantic Tailwind classes reference these shared var
 
 Fonts are bundled locally. shadcn primitives are in `src/components/ui`, shared storefront components in `src/components/store`, and admin UI in `src/components/admin`. `components.json` supports adding more shadcn components.
 
-## Products and future sync
+## Hsabate product sync
 
-The old `.env` referenced `https://oopsskin.ps/api`; the products endpoint returned 404 during inspection. Per the requested approach, the new store has **no dependency on that service** and does not perform external sync yet.
+Set server-only `HSABATE_EMAIL` and `HSABATE_PASSWORD` in `.env.local`. Open **/admin/hsabate** for API diagnostics, sync history and the **Sync products now** button. Only administrators can access these endpoints. Sync is manual; no scheduler or supplier upload is enabled.
 
-`src/lib/types.ts` defines the product model: stable local ID, bilingual names/descriptions, ILS price, optional original price, category, images, stock, visibility, collection badge, creation date and nullable `externalId`, `externalSource`, `syncedAt`. There is a unique index on external source + ID. Validation lives in `src/lib/validation.ts`.
+`POST https://s.hesabate.com/store_api.php` supplies the catalog. Each run authenticates afresh, downloads all products (`all=1`, `view_items_by=1`), the e-commerce subset (`all=0`), and categories. All supplier fields are stored at the product document's top level with their exact API names and JSON types, including `id`, `price`, `amount`, `product_prices`, `measure` and `cost`. MongoDB adds `_id`, source/sync metadata, `reservedStock`, and a separate `storefront` projection. For example, API `price: "85"` stays a string in MongoDB; the storefront exposes numeric `price: 85`. Only the projection is sent to storefront clients, so supplier costs remain private.
 
-When the supplier API is provided, add a server-side adapter to validate/map products and upsert by external source + ID, preserving local IDs and updating `syncedAt`. Decide ownership of local edits, stock and prices before syncing. Supplier credentials must remain server-side.
+Supplier IDs have stable local identities (`hsabate:<id>`); existing source-linked IDs are preserved. Hsabate owns product edits and visibility; local admin product writes return 409. API-relative image paths resolve against the production host. Missing images use the placeholder. API categories map known store collections, with unknown categories retained. The API does not provide the store's badge/discount fields, so these stay empty/null.
 
-**The seed catalog is demo data**, adapted from the old seeder and homepage, plus an illustrative Habibti kit. Local images reuse the original site's Unsplash photography; they are not exact supplier product images. Replace/archive sample products before taking real orders. Admin image fields accept HTTPS URLs or existing `/images/…` paths. Image uploading is not configured.
+A successful sync archives the previous local catalog and products removed from the supplier catalog; only the e-commerce subset is visible in the shop. Archival preserves order references. Empty, malformed or duplicate-ID downloads stop the sync. Catalog writes and success history commit in one MongoDB transaction (Atlas/replica set required); a database lock prevents overlapping syncs. The last ten successful runs and latest error are available in the dashboard.
+
+Local checkout reservations are tracked separately from API `amount`, subtracted from shop availability during sync, and released on cancellation. Orders are not uploaded to Hsabate, so these reservations are not automatically reconciled against orders entered manually in Hsabate.
+
+CLI: `npm run sync:products` creates a private backup under ignored `data/backups/` and runs the same sync function. `npm run sync:products -- --debug` tests the API without changing products. `npm run test:sync` runs offline validation tests. `node --import tsx --test tests/hsabate.integration.ts` uses mocked supplier responses and a temporary isolated database on the configured MongoDB server, then clears its test records (the restricted Atlas account cannot drop databases).
 
 ## Backend
 
@@ -71,7 +75,10 @@ API routes: `src/app/api/[...path]/route.ts`. Persistence: `src/lib/db.ts`. Uses
 | `/api/cart/voucher` | POST | Apply/remove voucher |
 | `/api/orders` | POST, GET | Guest/account checkout; GET returns own orders |
 | `/api/admin/overview` | GET | Protected store data |
-| `/api/admin/products[/:id]` | POST, PATCH, DELETE | Create/edit/archive |
+| `/api/admin/products[/:id]` | POST, PATCH, DELETE | Disabled: products are managed in Hsabate |
+| `/api/admin/hsabate` | GET | Configuration and sync status |
+| `/api/admin/hsabate/debug` | POST | Read-only supplier diagnostics |
+| `/api/admin/hsabate/sync` | POST | Manual product sync |
 | `/api/admin/orders/:id` | PATCH | Allowed status transitions |
 | `/api/admin/vouchers[/:code]` | POST, DELETE | Create/update/disable |
 | `/api/admin/settings` | PATCH | Delivery configuration/contact email |

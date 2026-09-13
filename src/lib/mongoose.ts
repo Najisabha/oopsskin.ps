@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+// Propagate transaction sessions to model operations, including stock reservations.
+mongoose.set("transactionAsyncLocalStorage", true);
+
 const globalMongoose = globalThis as unknown as {
   oopsskinMongoose?: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
 };

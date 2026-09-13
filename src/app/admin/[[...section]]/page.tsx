@@ -19,7 +19,7 @@ export default async function Page({ params }: { params: Promise<{ section?: str
   if (user.role !== "admin") redirect("/profile");
   const route = (await params).section || [];
   const section = route[0] || "overview";
-  if (route.length > 1 || !["overview", "products", "orders", "customers", "vouchers", "settings"].includes(section)) notFound();
+  if (route.length > 1 || !["overview", "products", "orders", "customers", "vouchers", "settings", "hsabate"].includes(section)) notFound();
   await db();
   const orderDocs = await OrderModel.find().sort({ createdAt: -1 }).lean();
   const userDocs = await UserModel.find().lean();

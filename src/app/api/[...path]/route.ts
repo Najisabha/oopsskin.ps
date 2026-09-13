@@ -1,3 +1,4 @@
+import { hsabateStatus, debugHsabate, syncHsabate } from "@/lib/hsabate";
 import { arabicError } from "@/lib/api-messages";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
@@ -7,10 +8,11 @@ import { UserModel, OrderModel } from "@/lib/models";
 import { cartOwner, currentUser, endSession, hashPassword, limitAuth, startSession, verifyPassword } from "@/lib/auth";
 import { placeOrder, updateOrderStatus } from "@/lib/orders";
 import { ApiError, quote, readCart, saveCart } from "@/lib/commerce";
-import { authSchema, cartSchema, checkoutSchema, productSchema, profileSchema, registerSchema, settingsSchema, voucherSchema } from "@/lib/validation";
+import { authSchema, cartSchema, checkoutSchema, profileSchema, registerSchema, settingsSchema, voucherSchema } from "@/lib/validation";
 import type { Product, User, Voucher } from "@/lib/types";
 
 export const runtime = "nodejs";
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ path: string[] }> };
 const json = (value: unknown, status = 200) => NextResponse.json(value, { status, headers: { "Cache-Control": "no-store" } });
@@ -122,6 +124,10 @@ async function handler(req: NextRequest, context: Context) {
     }
     if (parts[0] === "admin") {
       requireAdmin();
+      if (path === "admin/hsabate" && method === "GET") return json(await hsabateStatus());
+      if (path === "admin/hsabate/debug" && method === "POST") return json(await debugHsabate());
+      if (path === "admin/hsabate/sync" && method === "POST") return json(await syncHsabate());
+      if (parts[1] === "products" && method !== "GET") throw new ApiError("Products are managed in Hsabate. Edit there, then sync.", 409);
       if (path === "admin/overview" && method === "GET") {
         await db();
         const orderDocs = await OrderModel.find().sort({ createdAt: -1 }).lean();
@@ -134,15 +140,6 @@ async function handler(req: NextRequest, context: Context) {
           settings: await settings(),
         });
       }
-      if (parts[1] === "products" && ["POST", "PATCH"].includes(method)) {
-        const data = productSchema.parse(await body());
-        const old = parts[2] ? await get<Product>("products", parts[2]) : undefined;
-        if (method === "PATCH" && !old) throw new ApiError("Product not found.", 404);
-        const product: Product = { ...data, id: old?.id || randomUUID(), createdAt: old?.createdAt || new Date().toISOString(), syncedAt: old?.syncedAt || null };
-        await put("products", product.id, product);
-        return json({ product }, old ? 200 : 201);
-      }
-      if (parts[1] === "products" && parts[2] && method === "DELETE") { const old = await get<Product>("products", parts[2]); if (!old) throw new ApiError("Product not found.", 404); await put("products", old.id, { ...old, active: false }); return json({ ok: true }); }
       if (parts[1] === "orders" && parts[2] && method === "PATCH") {
         const { status } = z.object({ status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]) }).parse(await body());
         const order = await updateOrderStatus(parts[2], status);

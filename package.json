@@ -11,7 +11,9 @@
     "test": "playwright test",
     "admin:create": "tsx scripts/create-admin.ts",
     "migrate:sqlite-to-mongo": "tsx scripts/migrate-sqlite-to-mongo.ts",
-    "test:unit": "node --import tsx --test tests/commerce.unit.ts"
+    "test:unit": "node --import tsx --test tests/commerce.unit.ts",
+    "sync:products": "tsx scripts/sync-products.ts",
+    "test:sync": "node --import tsx --test tests/hsabate.unit.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
