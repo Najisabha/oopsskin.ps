@@ -13,6 +13,7 @@
     "migrate:sqlite-to-mongo": "tsx scripts/migrate-sqlite-to-mongo.ts",
     "test:unit": "node --import tsx --test tests/commerce.unit.ts",
     "sync:products": "tsx scripts/sync-products.ts",
+    "test:content": "node --import tsx --test tests/store-content.unit.ts",
     "test:sync": "node --import tsx --test tests/hsabate.unit.ts"
   },
   "dependencies": {

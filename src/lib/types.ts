@@ -23,4 +23,7 @@ export type CartLine = CartItem & { product: Product };
 export type Cart = { items: CartLine[]; subtotal: number; shipping: number; discount: number; total: number; voucherCode: string; warning?: string };
 export type Order = { id: string; userId: string | null; name: string; email: string; phone: string; address: string; city: string; notes: string; items: { productId: string; name: string; price: number; quantity: number }[]; subtotal: number; discount: number; shipping: number; total: number; voucherCode: string; status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled"; createdAt: string; paymentMethod: "cash-on-delivery" };
 export type Voucher = { code: string; percent: number; minimum: number; maxUses: number; used: number; active: boolean; expiresAt: string | null };
-export type StoreSettings = { shippingFee: number; freeShippingThreshold: number; contactEmail: string };
+export type StoreSettings = { shippingFee: number; freeShippingThreshold: number; contactEmail: string; navigation?: NavigationLink[]; pages?: StorePage[]; homeProductCount?: number };
+
+export type NavigationLink = { href: string; label: string; labelAr: string; visible: boolean };
+export type StorePage = { slug: string; title: string; titleAr: string; description: string; descriptionAr: string; active: boolean; mode: "automatic" | "manual"; productIds: string[] };

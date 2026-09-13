@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductCard, categoryName } from "./product-card";
 import { useStore } from "./provider";
-import type { Product } from "@/lib/types";
+import type { Product, StorePage } from "@/lib/types";
 const titles: Record<string, [string, string, string, string]> = { "all-products": ["The beauty edit", "كل ما بتحبيه", "Your next favorite is waiting to be discovered.", "منتجك المفضل الجديد بانتظارك."], "best-sellers": ["Everyday favorites", "الأكثر مبيعاً", "The little things that deserve a place in your routine.", "تفاصيل صغيرة بتستاهل مكان بروتينك."], new: ["Fresh on the shelf", "وصل حديثاً", "A fresh dose of beauty for your everyday.", "جرعة جديدة من الجمال ليومك."], makeup: ["Make it your own", "مكياج بيشبهك", "A little color, a little confidence, all you.", "شوية لون، شوية ثقة، وكتير إنتِ."], skincare: ["Skin comes first", "بشرتك أولاً", "Make room for a little everyday care.", "اعملي مساحة لشوية عناية يومية."], packages: ["Better together", "مجموعات حبيبتي", "For someone you love. Yourself included.", "لشخص بتحبيه. ولنفسك كمان."], favorites: ["Your little love list", "المفضلة", "All the things that caught your heart, in one place.", "كل الأشياء اللي حبيتيها، بمكان واحد."] };
-export function Catalog({ products, collection, initialSearch = "", initialCategory = "all" }: { products: Product[]; collection: string; initialSearch?: string; initialCategory?: string }) {
+export function Catalog({ products, collection, pageContent, initialSearch = "", initialCategory = "all" }: { products: Product[]; collection: string; pageContent?: StorePage; initialSearch?: string; initialCategory?: string }) {
   const { t, favorites, currency } = useStore();
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
@@ -18,15 +18,15 @@ export function Catalog({ products, collection, initialSearch = "", initialCateg
   const [maxPrice, setMaxPrice] = useState("");
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-  const title = titles[collection] || titles["all-products"];
+  const title = pageContent ? [pageContent.title, pageContent.titleAr, pageContent.description, pageContent.descriptionAr] : titles[collection] || titles["all-products"];
   let base = products;
-  if (["makeup", "skincare", "packages"].includes(collection)) base = base.filter(p => p.category.toLowerCase() === collection);
-  if (collection === "new") base = base.filter(p => p.badge === "new");
-  if (collection === "best-sellers") base = base.filter(p => p.badge === "best-seller");
+  if (!pageContent && ["makeup", "skincare", "packages"].includes(collection)) base = base.filter(p => p.category.toLowerCase() === collection);
+  if (!pageContent && collection === "new") base = base.filter(p => p.badge === "new");
+  if (!pageContent && collection === "best-sellers") base = base.filter(p => p.badge === "best-seller");
   if (collection === "favorites") base = base.filter(p => favorites.includes(p.id));
   const categories = [...new Set(base.map(p => p.category))];
   let filtered = base.filter(p => (category === "all" || p.category === category) && (!inStock || p.stock > 0) && (!maxPrice || p.price <= Number(maxPrice)) && `${p.name} ${p.nameAr} ${p.description} ${p.descriptionAr}`.toLowerCase().includes(search.toLowerCase()));
-  filtered = [...filtered].sort((a, b) => sort === "price-asc" ? a.price - b.price : sort === "price-desc" ? b.price - a.price : sort === "newest" ? b.createdAt.localeCompare(a.createdAt) : Number(b.badge === "best-seller") - Number(a.badge === "best-seller"));
+  filtered = [...filtered].sort((a, b) => sort === "price-asc" ? a.price - b.price : sort === "price-desc" ? b.price - a.price : sort === "newest" ? b.createdAt.localeCompare(a.createdAt) : pageContent?.mode === "manual" ? 0 : Number(b.badge === "best-seller") - Number(a.badge === "best-seller"));
   const pages = Math.max(1, Math.ceil(filtered.length / 12));
   const currentPage = Math.min(page, pages);
   const reset = () => { setSearch(""); setCategory("all"); setInStock(false); setMaxPrice(""); setSort("featured"); setPage(1); };

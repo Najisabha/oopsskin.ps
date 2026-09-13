@@ -1,16 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Heart, Package, ShoppingBag, Sparkles, Truck } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "./provider";
 import { ProductCard } from "./product-card";
 import { ProductImage } from "./product-image";
+import { defaultPages, pageProducts } from "@/lib/store-content";
 import type { Product } from "@/lib/types";
 const slides = ["/images/beauty-collection.jpg", "/images/beauty-ritual.jpg", "/images/makeup.jpg"];
 export function HomeContent({ products }: { products: Product[] }) {
-  const { t, language } = useStore();
+  const { t, language, settings } = useStore();
   const [slide, setSlide] = useState(0);
+  const collectionProducts = (slug: string) => { const page = (settings.pages ?? defaultPages).find(p => p.slug === slug && p.active); return page ? pageProducts(products, page).slice(0, 12) : []; };
   const Arrow = language === "ar" ? ArrowLeft : ArrowRight;
   return <>
     <section className="relative overflow-hidden bg-secondary">
@@ -35,11 +37,15 @@ export function HomeContent({ products }: { products: Product[] }) {
       <div className="mb-9 flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow mb-3 text-primary">{t("A BEAUTY MOMENT FOR EVERY MOOD", "لكل لحظة، جمالها")}</p><h2 className="heading">{t("What are you in the mood for?", "شو حابة تدلّلي اليوم؟")}</h2></div><Link href="/all-products" className="flex items-center gap-2 border-b border-primary pb-1 text-xs font-medium text-primary">{t("Explore everything", "اكتشفي كل المنتجات")}<Arrow className="size-3.5" /></Link></div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[["/skincare", "Skincare", "العناية بالبشرة", "Your daily dose of care", "جرعتك اليومية من العناية", "cream"], ["/makeup", "Makeup", "المكياج", "A little color. All you.", "لمسة لون بتشبهك", "makeup"], ["/packages", "Habibti kits", "مجموعات حبيبتي", "Better together", "أحلى مع بعض", "beauty-collection"], ["/new", "New arrivals", "وصل حديثاً", "Meet your next favorite", "تعرفي على مفضلتك الجديدة", "serum"]].map(([href, en, ar, desc, descAr, img]) => <Link href={href} key={href} className="group relative aspect-[1.12] overflow-hidden rounded-xl bg-muted"><ProductImage src={`/images/${img}.jpg`} alt={t(en, ar)} className="transition-transform duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" /><div className="absolute inset-x-4 bottom-4 text-white sm:inset-x-5 sm:bottom-5"><div className="flex items-center justify-between"><h3 className="text-base font-medium sm:text-xl">{t(en, ar)}</h3><Arrow className="size-4" /></div><p className="mt-2 hidden text-xs text-white/80 sm:block">{t(desc, descAr)}</p></div></Link>)}</div>
     </section>
-    <ProductShelf products={products.filter(p => p.badge === "best-seller")} title={t("The ones you'll love", "منتجات رح تحبيها")} label={t("THE EVERYDAY FAVORITES", "المفضلات اليومية")} href="/best-sellers" />
+    <section className="page-container pb-16">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4"><h2 className="heading">{t("Discover more favorites", "اكتشفي المزيد من المنتجات")}</h2><Link href="/all-products" className="text-sm text-primary underline">{t("Shop all products", "تسوقي كل المنتجات")}</Link></div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">{products.slice(0, settings.homeProductCount ?? 24).map(product => <ProductCard key={product.id} product={product} />)}</div>
+    </section>
+    <ProductShelf products={collectionProducts("best-sellers")} title={t("The ones you'll love", "منتجات رح تحبيها")} label={t("THE EVERYDAY FAVORITES", "المفضلات اليومية")} href="/best-sellers" />
     <section className="page-container py-12">
       <div className="grid overflow-hidden rounded-2xl bg-secondary md:grid-cols-2"><div className="relative min-h-80"><ProductImage src="/images/beauty-collection.jpg" alt={t("The Habibti makeup collection", "مجموعة مكياج حبيبتي")} sizes="(max-width: 768px) 100vw, 50vw" /></div><div className="flex flex-col items-start justify-center p-8 sm:p-12 lg:p-16"><p className="eyebrow mb-5 text-primary">{t("A LITTLE SOMETHING FOR YOUR HABIBTI", "هدية حلوة لحبيبتك… أو إلك")}</p><h2 className="heading text-primary">{t("Habibti, this one's for you.", "حبيبتي، هاي إلك.")}</h2><p className="mb-7 mt-5 text-sm leading-7 text-muted-foreground">{t("Your favorite things, all together. Discover beauty sets made for gifting, sharing, or a little well-deserved self-love.", "أشيائك المفضلة، كلها مع بعض. اكتشفي مجموعات الجمال للهدايا، للمشاركة، أو لشوية دلع بتستاهليهم.")}</p><Button asChild className="h-11 rounded-full px-6"><Link href="/packages">{t("Shop the kits", "تسوقي المجموعات")}<Arrow className="ms-2 size-4" /></Link></Button></div></div>
     </section>
-    <ProductShelf products={products.filter(p => p.category === "Skincare")} title={t("Good days start with good care", "يومك الحلو بيبدأ بعناية")} label={t("SKIN FIRST, ALWAYS", "بشرتك أولاً، دايماً")} href="/skincare" />
+    <ProductShelf products={collectionProducts("skincare")} title={t("Good days start with good care", "يومك الحلو بيبدأ بعناية")} label={t("SKIN FIRST, ALWAYS", "بشرتك أولاً، دايماً")} href="/skincare" />
   </>;
 }
 function ProductShelf({ products, title, label, href }: { products: Product[]; title: string; label: string; href: string }) {

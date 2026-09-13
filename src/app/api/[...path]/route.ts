@@ -3,7 +3,7 @@ import { arabicError } from "@/lib/api-messages";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { all, db, get, put, products, settings, transaction } from "@/lib/db";
+import { all, db, get, getProduct, put, products, settings, transaction } from "@/lib/db";
 import { UserModel, OrderModel } from "@/lib/models";
 import { cartOwner, currentUser, endSession, hashPassword, limitAuth, startSession, verifyPassword } from "@/lib/auth";
 import { placeOrder, updateOrderStatus } from "@/lib/orders";
@@ -42,7 +42,7 @@ async function handler(req: NextRequest, context: Context) {
     const requireAdmin = () => { if (requireUser().role !== "admin") throw new ApiError("Administrator access required.", 403); };
 
     if (path === "products" && method === "GET") return json({ products: await products() });
-    if (parts[0] === "products" && parts.length === 2 && method === "GET") { const product = await get<Product>("products", parts[1]); if (!product?.active) throw new ApiError("Product not found.", 404); return json({ product }); }
+    if (parts[0] === "products" && parts.length === 2 && method === "GET") { const product = await getProduct(parts[1]); if (!product?.active) throw new ApiError("Product not found.", 404); return json({ product }); }
     if (path === "settings" && method === "GET") return json({ settings: await settings() });
     if (path === "auth/current" && method === "GET") return json({ user });
     if ((path === "auth/register" || path === "auth/login") && method === "POST") {
@@ -147,7 +147,7 @@ async function handler(req: NextRequest, context: Context) {
       }
       if (parts[1] === "vouchers" && method === "POST") { const data = voucherSchema.parse(await body()); const old = await get<Voucher>("vouchers", data.code); await put("vouchers", data.code, { ...data, used: old?.used || 0 }); return json({ ok: true }); }
       if (parts[1] === "vouchers" && parts[2] && method === "DELETE") { const old = await get<Voucher>("vouchers", parts[2]); if (!old) throw new ApiError("Voucher not found.", 404); await put("vouchers", old.code, { ...old, active: false }); return json({ ok: true }); }
-      if (path === "admin/settings" && method === "PATCH") { const data = settingsSchema.parse(await body()); await put("settings", "store", data); return json({ settings: data }); }
+      if (path === "admin/settings" && method === "PATCH") { const data = settingsSchema.parse(await body()); await put("settings", "store", data); return json({ settings: await settings() }); }
     }
     throw new ApiError("Route not found.", 404);
   } catch (error) {

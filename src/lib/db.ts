@@ -1,3 +1,4 @@
+import { defaultNavigation, defaultPages } from "./store-content";
 import { connectMongo } from "./mongoose";
 import { ProductModel, VoucherModel, SettingsModel } from "./models";
 import { seedProducts } from "./seed";
@@ -9,7 +10,7 @@ const modelFor = { products: ProductModel, vouchers: VoucherModel, settings: Set
 function toPlain<T>(doc: Record<string, unknown>): T {
   if (doc.externalSource === "hsabate" && doc.storefront) return { ...(doc.storefront as Product), id: String(doc._id) } as T;
   const { _id, ...rest } = doc;
-  return { id: _id, ...rest } as T;
+  return { ...rest, id: String(_id) } as T;
 }
 function toDoc<T extends { id: string }>(value: T) {
   const { id, ...rest } = value;
@@ -47,6 +48,13 @@ export async function get<T>(table: Table, id: string): Promise<T | undefined> {
   const doc = await modelFor[table].findById(id).lean();
   return doc ? toPlain<T>(doc as Record<string, unknown>) : undefined;
 }
+// Old supplier-number links resolve to the same canonical storefront product.
+export async function getProduct(id: string): Promise<Product | undefined> {
+  const product = await get<Product>("products", id);
+  if (product || !/^\d+$/.test(id)) return product;
+  const doc = await ProductModel.findOne({ externalSource: "hsabate", externalId: id }).lean();
+  return doc ? toPlain<Product>(doc as Record<string, unknown>) : undefined;
+}
 export async function put<T extends { id?: string } & Record<string, unknown>>(table: Table, id: string, value: T) {
   await db();
   if (table === "products") {
@@ -68,7 +76,7 @@ export async function products(): Promise<Product[]> {
   return list.filter(p => p.active);
 }
 export async function settings(): Promise<StoreSettings> {
-  return (await get<StoreSettings>("settings", "store"))!;
+  return { navigation: defaultNavigation, pages: defaultPages, homeProductCount: 24, ...(await get<StoreSettings>("settings", "store"))! };
 }
 
 export async function transaction<T>(fn: () => Promise<T>): Promise<T> {
