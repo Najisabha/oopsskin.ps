@@ -1,6 +1,7 @@
 export type Language = "en" | "ar";
 export type Product = {
   id: string;
+  slug: string;
   name: string;
   nameAr: string;
   description: string;

@@ -3,6 +3,7 @@ import { Schema, model, models, type InferSchemaType } from "mongoose";
 const ProductSchema = new Schema({
   _id: { type: String, required: true },
   id: { type: String },
+  slug: { type: String, default: null },
   class_id: { type: Schema.Types.Mixed },
   barcode: { type: Schema.Types.Mixed },
   item_img: { type: Schema.Types.Mixed },
@@ -46,6 +47,9 @@ ProductSchema.index(
   { externalSource: 1, externalId: 1 },
   { unique: true, partialFilterExpression: { externalId: { $type: "string" } } }
 );
+// Slug is the public URL segment; supplier products carry it on the storefront view.
+ProductSchema.index({ "storefront.slug": 1 }, { sparse: true });
+ProductSchema.index({ slug: 1 }, { sparse: true });
 
 const UserSchema = new Schema({
   _id: { type: String, required: true },

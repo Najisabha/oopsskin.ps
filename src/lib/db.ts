@@ -8,9 +8,15 @@ type Table = "products" | "vouchers" | "settings";
 const modelFor = { products: ProductModel, vouchers: VoucherModel, settings: SettingsModel } as const;
 
 function toPlain<T>(doc: Record<string, unknown>): T {
-  if (doc.externalSource === "hsabate" && doc.storefront) return { ...(doc.storefront as Product), id: String(doc._id) } as T;
+  if (doc.externalSource === "hsabate" && doc.storefront) {
+    const view = doc.storefront as Product;
+    const id = String(doc._id);
+    // Products synced before slugs existed fall back to the id, so links never break.
+    return { ...view, id, slug: view.slug || String(doc.externalId || id) } as T;
+  }
   const { _id, ...rest } = doc;
-  return { ...rest, id: String(_id) } as T;
+  const id = String(_id);
+  return { ...rest, id, slug: (rest.slug as string) || id } as T;
 }
 function toDoc<T extends { id: string }>(value: T) {
   const { id, ...rest } = value;
@@ -48,11 +54,19 @@ export async function get<T>(table: Table, id: string): Promise<T | undefined> {
   const doc = await modelFor[table].findById(id).lean();
   return doc ? toPlain<T>(doc as Record<string, unknown>) : undefined;
 }
-// Old supplier-number links resolve to the same canonical storefront product.
-export async function getProduct(id: string): Promise<Product | undefined> {
-  const product = await get<Product>("products", id);
-  if (product || !/^\d+$/.test(id)) return product;
-  const doc = await ProductModel.findOne({ externalSource: "hsabate", externalId: id }).lean();
+// Accepts the public slug, and still resolves legacy links: the internal
+// "hsabate:123" id and the bare supplier number both reach the same product.
+export async function getProduct(idOrSlug: string): Promise<Product | undefined> {
+  await db();
+  const bySlug = await ProductModel.findOne({
+    $or: [{ "storefront.slug": idOrSlug }, { slug: idOrSlug }],
+  }).lean();
+  if (bySlug) return toPlain<Product>(bySlug as Record<string, unknown>);
+
+  const product = await get<Product>("products", idOrSlug);
+  if (product) return product;
+  if (!/^\d+$/.test(idOrSlug)) return undefined;
+  const doc = await ProductModel.findOne({ externalSource: "hsabate", externalId: idOrSlug }).lean();
   return doc ? toPlain<Product>(doc as Record<string, unknown>) : undefined;
 }
 export async function put<T extends { id?: string } & Record<string, unknown>>(table: Table, id: string, value: T) {

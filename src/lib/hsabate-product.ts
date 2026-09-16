@@ -17,10 +17,24 @@ export function validateProducts(value: unknown): ApiProduct[] {
     return row as ApiProduct;
   });
 }
+// Readable URL segment. Latin and Arabic letters are kept, everything else becomes a dash.
+// The supplier id is appended so slugs stay unique even when two products share a name.
+export function productSlug(name: string, externalId: string): string {
+  const base = name
+    .normalize('NFKD')
+    .replace(/[̀-ًͯ-ْ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9ء-ي]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/g, '');
+  return base ? `${base}-${externalId}` : externalId;
+}
+
 export function productView(row: ApiProduct, category: string, active: boolean, now: string, reserved = 0): Product {
   const english = typeof row.name_e === 'string' && row.name_e.trim() ? row.name_e : row.name;
   const description = typeof row.note === 'string' ? row.note : '';
   const image = typeof row.item_img === 'string' && /^https:\/\//i.test(row.item_img) ? row.item_img : typeof row.item_img === 'string' && /^\/?storage\/[\w/.-]+$/.test(row.item_img) ? new URL(row.item_img, 'https://s.hesabate.com/').href : '/images/product-placeholder.svg';
   const categoryMap: Record<string, string> = { 'skin care': 'Skincare', 'hair care': 'Haircare', 'make up': 'Makeup', 'global makeup': 'Makeup', 'ميك اب براند': 'Makeup', 'العطور': 'Fragrance' };
-  return { id: `hsabate:${row.id}`, name: english, nameAr: row.name, description, descriptionAr: description, price: Number(row.price), compareAtPrice: null, category: categoryMap[category.toLowerCase()] || category || 'Uncategorized', images: [image], stock: Math.max(0, Math.floor(Number(row.amount) - reserved)), badge: '', active, externalId: row.id, externalSource: 'hsabate', syncedAt: now, createdAt: now };
+  return { id: `hsabate:${row.id}`, slug: productSlug(english || row.name, row.id), name: english, nameAr: row.name, description, descriptionAr: description, price: Number(row.price), compareAtPrice: null, category: categoryMap[category.toLowerCase()] || category || 'Uncategorized', images: [image], stock: Math.max(0, Math.floor(Number(row.amount) - reserved)), badge: '', active, externalId: row.id, externalSource: 'hsabate', syncedAt: now, createdAt: now };
 }
