@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useStore } from "./provider";
 import { ProductImage } from "./product-image";
 import { errorMessage } from "@/lib/client";
-export function EmptyBag() { const { t } = useStore(); return <div className="page-container py-24 text-center"><ShoppingBag className="mx-auto mb-6 size-12 text-accent" /><h1 className="heading">{t("A little room for something lovely", "في مكان لشي حلو بسلتك")}</h1><p className="mb-8 mt-4 text-sm text-muted-foreground">{t("Your bag is empty. Let's find your next favorite.", "سلتك فاضية. خلينا نلاقي منتجك المفضل الجديد.")}</p><Button asChild className="rounded-full"><Link href="/all-products">{t("Explore the shop", "تصفحي المتجر")}</Link></Button></div>; }
+export function EmptyBag() { const { t } = useStore(); return <div className="page-container py-24 text-center"><ShoppingCart className="mx-auto mb-6 size-12 text-accent" /><h1 className="heading">{t("A little room for something lovely", "في مكان لشي حلو بسلتك")}</h1><p className="mb-8 mt-4 text-sm text-muted-foreground">{t("Your cart is empty. Let's find your next favorite.", "سلتك فاضية. خلينا نلاقي منتجك المفضل الجديد.")}</p><Button asChild className="rounded-full"><Link href="/all-products">{t("Explore the shop", "تصفحي المتجر")}</Link></Button></div>; }
 export function StoreLoading() { const { t, loadingError } = useStore(); return <div className="page-container py-20" role="status">{loadingError ? <div className="soft-panel"><p>{t("We couldn't load your bag. Please refresh to try again.", "ما قدرنا نحمّل سلتك. حدّثي الصفحة وجربي مرة ثانية.")}</p><Button className="mt-4" onClick={() => window.location.reload()}>{t("Try again", "حاولي مرة ثانية")}</Button></div> : <><span className="sr-only">{t("Loading", "جاري التحميل")}</span><Skeleton className="mb-8 h-12 w-60" /><Skeleton className="h-70 w-full" /></>}</div>; }
 export function OrderSummary({ checkout = false }: { checkout?: boolean }) {
   const { t, currency, cart, applyVoucher, settings } = useStore();

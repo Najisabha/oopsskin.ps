@@ -24,6 +24,10 @@
   --input: #dfd0d1;
   --ring: #c2185b;
   --destructive: #b42318;
+  --navbar: #e91e63;
+  --navbar-foreground: #ffffff;
+  --announcement: #8e1140;
+  --announcement-foreground: #ffffff;
   --radius: 0.75rem;
   --font-body: "DM Sans Variable", "Noto Sans Arabic Variable", sans-serif;
   --font-heading: "Chewy", "Estedad Variable", cursive;
@@ -49,6 +53,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
+  --color-navbar: var(--navbar);
+  --color-navbar-foreground: var(--navbar-foreground);
+  --color-announcement: var(--announcement);
+  --color-announcement-foreground: var(--announcement-foreground);
   --font-sans: var(--font-body);
   --font-display: var(--font-heading);
   --radius-sm: calc(var(--radius) - 4px);
