@@ -1,4 +1,23 @@
-import type { NavigationLink, Product, StorePage } from "./types";
+import type { NavigationLink, Product, StorePage, Order } from "./types";
+
+// International format, no leading "+", as required by wa.me links.
+export const businessWhatsApp = "972598199142";
+export function orderWhatsAppUrl(order: Order, currency: (value: number) => string) {
+  const lines = [
+    `New order ${order.id}`,
+    "",
+    ...order.items.map(i => `- ${i.name} x${i.quantity} (${currency(i.price * i.quantity)})`),
+    "",
+    `Total: ${currency(order.total)} (Cash on delivery)`,
+    "",
+    `Name: ${order.name}`,
+    `Phone: ${order.phone}`,
+    `City: ${order.city}`,
+    `Address: ${order.address}`,
+    ...(order.notes ? [`Notes: ${order.notes}`] : []),
+  ];
+  return `https://wa.me/${businessWhatsApp}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 
 // Categories are whatever the catalogue actually contains — synced products keep their raw
 // source category when hsabate-product's categoryMap has no entry, so a hardcoded list goes
